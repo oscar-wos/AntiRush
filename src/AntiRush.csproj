@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="CounterStrikeSharp.API" Version="*" ExcludeAssets="runtime" />
+		<ProjectReference Include="..\..\Menu\src\Menu.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\lang\**\*.*">
+			<Link>%(RecursiveDir)\lang\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+		<Copy SourceFiles="$(OutputPath)AntiRush.dll" DestinationFolder="\\wsl.localhost\Debian\home\user\cs2\game\csgo\addons\counterstrikesharp\plugins\AntiRush" />
+		<Copy SourceFiles="$(OutputPath)lang\en.json" DestinationFolder="\\wsl.localhost\Debian\home\user\cs2\game\csgo\addons\counterstrikesharp\plugins\AntiRush\lang" />
+	</Target>
+
+</Project>

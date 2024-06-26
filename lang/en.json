@@ -1,0 +1,22 @@
+{
+  "t": "T",
+  "ct": "CT",
+  "both": "Both",
+  "missingPermission": "Missing permission: {red}{0}",
+  "invalidInput": "Invalid input: '{lightred}{0}{default}' ({orange}{1}{default})",
+  "zone.Bounce": "Bounce",
+  "zone.Hurt": "Hurt",
+  "zone.Kill": "Kill",
+  "zone.Teleport": "Teleport",
+  "menu.Add": "Add Zone",
+  "menu.View": "View Zones",
+  "menu.Debug": "Debug: ",
+  "menu.Type": "Type: ",
+  "menu.Teams": "Teams: ",
+  "menu.Name": "Name: ",
+  "menu.Delay": "Delay: ",
+  "menu.Damage": "Damage: ",
+  "menu.Seconds": " Second(s)",
+  "menu.Save": "Save",
+  "menu.Shoot": "Shoot point: {0}"
+}
