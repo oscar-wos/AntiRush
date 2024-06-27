@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AntiRush", "src\AntiRush.csproj", "{9B2DEBE8-1EEF-47E8-B890-D15A3F0FF109}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Menu", "..\Menu\src\Menu.csproj", "{5AC48D94-A9F6-4566-92A4-F78C39A9FCD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Menu", ".\Menu\src\Menu.csproj", "{5AC48D94-A9F6-4566-92A4-F78C39A9FCD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
