@@ -75,7 +75,7 @@ public partial class AntiRush : BasePlugin
 
     private bool DoAction(CCSPlayerController controller, Zone zone)
     {
-        if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage > 1)
+        if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
             controller!.PrintToChat($"{Prefix}{FormatZoneString(zone.Type)}");
 
         _playerData[controller].LastMessage = Server.CurrentTime;

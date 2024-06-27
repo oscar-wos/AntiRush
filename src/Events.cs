@@ -39,7 +39,17 @@ public partial class AntiRush
         if (value.AddZone.Points[0].IsZero())
             value.AddZone.Points[0] = new Vector(@event.X, @event.Y, @event.Z);
         else if (value.AddZone.Points[1].IsZero())
+        {
             value.AddZone.Points[1] = new Vector(@event.X, @event.Y, @event.Z);
+
+            if (Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z) < 76)
+            {
+                if (value.AddZone.Points[0].Z >= value.AddZone.Points[1].Z)
+                    value.AddZone.Points[0].Z += 150;
+                else
+                    value.AddZone.Points[1].Z += 150;
+            }
+        }
 
         Menu.PopMenu(controller!, value.AddZone);
         BuildAddZoneMenu(controller!);
