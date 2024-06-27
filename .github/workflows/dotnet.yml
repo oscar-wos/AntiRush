@@ -49,9 +49,6 @@ jobs:
               run: |
                 mkdir -p ./plugin/plugins/${{ github.event.repository.name }}
                 mkdir -p ./plugin/shared/Menu
-                ls -a
-                cd ./plugin
-                ls -a
 
             - name: Move Files
               run: |

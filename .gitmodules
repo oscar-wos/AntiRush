@@ -1,3 +1,3 @@
 [submodule "Menu"]
 	path = Menu
-	url = git@github.com:oscar-wos/Menu.git
+	url = https://github.com/oscar-wos/Menu.git
