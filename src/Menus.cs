@@ -11,11 +11,16 @@ public partial class AntiRush
 {
     private void BuildMenu(CCSPlayerController controller, MenuType type = MenuType.Main)
     {
-        if (!controller.IsValid)
+        if (!IsValidPlayer(controller))
             return;
 
         if (_playerData[controller].AddZone != null)
+        {
+            for (var i = 0; i < 2; i++)
+                _playerData[controller].AddZone!.Points[i] = Vector.Zero;
+
             _playerData[controller].AddZone = null;
+        }
 
         switch (type)
         {
@@ -34,7 +39,7 @@ public partial class AntiRush
 
     private void BuildMainMenu(CCSPlayerController controller, bool updateMenu = false)
     {
-        var mainMenu = new MenuBase(new MenuValue("Anti-Rush") { Prefix = "<font class=\"fontSize-l\">", Suffix = "<font class=\"fontSize-m\">" });
+        var mainMenu = new MenuBase(new MenuValue("AntiRush") { Prefix = "<font class=\"fontSize-l\">", Suffix = "<font class=\"fontSize-m\">" });
 
         var customButtons = new List<MenuValue>
         {
@@ -96,7 +101,7 @@ public partial class AntiRush
 
     private void BuildAddZoneMenu(CCSPlayerController controller)
     {
-        var addZoneMenu = new AddZoneMenu(new MenuValue("Add Zone") { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" } };
+        var addZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.Add"]) { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" } };
 
         if (_playerData[controller].AddZone == null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "1"])));
@@ -131,7 +136,7 @@ public partial class AntiRush
                 ? new MenuItem(MenuItemType.Input, new MenuValue(Localizer["menu.Damage"]))
                 : new MenuItem(MenuItemType.Spacer));
 
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], c => SaveZone(c)) { Prefix = "<font color=\"#ADD8E6\">" }]));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], SaveZone) { Prefix = "<font color=\"#ADD8E6\">" }]));
 
             addZoneMenu.Items[3].DataString = "0.0";
             addZoneMenu.Items[4].DataString = "10";
