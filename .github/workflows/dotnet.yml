@@ -7,10 +7,10 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout repository
+            - name: checkout all the submodules
               uses: actions/checkout@v4
               with:
-                  submodules: recursive
+                submodules: recursive
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
@@ -47,27 +47,30 @@ jobs:
 
             - name: Create Directories
               run: |
-                mkdir -p plugin/plugins/AntiRush
-                mkdir -p plugin/shared/Menu
+                mkdir -p ./plugin/plugins/${{ github.event.repository.name }}
+                mkdir -p ./plugin/shared/Menu
+                ls -a
+                cd ./plugin
+                ls -a
 
             - name: Move Files
               run: |
-                mv ./src/bin/Release/net8.0/* ./plugin/plugins/AntiRush
-                mv ./Menu/bin/Release/net8.0/* ./plugin/shared/Menu
+                mv ./src/bin/Release/net8.0/* ./plugin/plugins/${{ github.event.repository.name }}
+                mv ./Menu/src/bin/Release/net8.0/* ./plugin/shared/Menu
 
             - name: Remove .API
               run: |
-                rm ./plugin/plugins/AntiRush/Menu.*
+                rm ./plugin/plugins/${{ github.event.repository.name }}/Menu.*
 
             - name: Zip
               run: |
-                cd plugin/
-                zip -r AntiRush-${{ github.sha }}.zip .
+                ls -a
+                zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip ./plugin
 
             - name: Extract version and create tag
               id: extract_version
               run: |
-                version="1.0.4"
+                version="1.0.0"
                 echo "Version found: $version"
                 git config --global user.email "actions@github.com"
                 git config --global user.name "GitHub Actions"
@@ -78,7 +81,7 @@ jobs:
             - name: Publish
               uses: actions/upload-artifact@v4
               with:
-                name: AntiRush-${{ github.sha }}
+                name: ${{ github.event.repository.name }}-${{ github.sha }}
                 path: plugin
 
             - name: Create Release
@@ -101,6 +104,6 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./plugin/AntiRush-${{ github.sha }}.zip
-                  asset_name: AntiRush.zip
+                  asset_path: ./${{ github.event.repository.name }}-${{ github.sha }}.zip
+                  asset_name: ${{ github.event.repository.name }}.zip
                   asset_content_type: application/zip
