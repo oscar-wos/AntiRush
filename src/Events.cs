@@ -42,12 +42,14 @@ public partial class AntiRush
         {
             value.AddZone.Points[1] = new Vector(@event.X, @event.Y, @event.Z);
 
-            if (Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z) < 76)
+            var diff = Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z);
+
+            if (diff < 200)
             {
                 if (value.AddZone.Points[0].Z >= value.AddZone.Points[1].Z)
-                    value.AddZone.Points[0].Z += 150;
+                    value.AddZone.Points[0].Z += 200 - diff;
                 else
-                    value.AddZone.Points[1].Z += 150;
+                    value.AddZone.Points[1].Z += 200 - diff;
             }
         }
 
