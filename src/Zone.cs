@@ -2,7 +2,6 @@
 using CounterStrikeSharp.API.Modules.Utils;
 using AntiRush.Enums;
 
-
 namespace AntiRush;
 
 public class Zone(ZoneType type, CsTeam[] teams, Vector minPoint, Vector maxPoint, string name, float delay, int damage)

@@ -1,7 +1,4 @@
-﻿using CounterStrikeSharp.API.Modules.Utils;
-using Microsoft.Extensions.Logging;
-using System.Text.Json.Nodes;
-using System.Text.Json;
+﻿using Microsoft.Extensions.Logging;
 
 namespace AntiRush;
 

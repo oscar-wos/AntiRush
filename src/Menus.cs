@@ -1,9 +1,9 @@
-﻿using AntiRush.Enums;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Utils;
 using Menu;
 using Menu.Enums;
+using AntiRush.Enums;
 
 namespace AntiRush;
 
@@ -19,6 +19,7 @@ public partial class AntiRush
             for (var i = 0; i < 2; i++)
                 _playerData[controller].AddZone!.Points[i] = Vector.Zero;
 
+            _playerData[controller].AddZone!.LastShot = 0;
             _playerData[controller].AddZone = null;
         }
 
@@ -51,7 +52,7 @@ public partial class AntiRush
 
         mainMenu.AddItem(new MenuItem(MenuItemType.Button, customButtons));
         mainMenu.AddItem(new MenuItem(MenuItemType.Spacer));
-        mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue(Localizer["menu.Debug"])) { Data = [_playerData[controller].Debug ? 1 : 0] });
+        mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue($"{Localizer["menu.Debug"]} ")) { Data = [_playerData[controller].Debug ? 1 : 0] });
 
         if (_playerData[controller].Debug)
         {
@@ -124,16 +125,16 @@ public partial class AntiRush
                 new(Localizer["both"]) { Prefix = "<font color=\"#C2AD7D\">", Suffix = "<font color=\"#FFFFFF\">" }
             };
 
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue(Localizer["menu.Type"]), zoneTypes));
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue(Localizer["menu.Teams"]), teams, true));
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Input, new MenuValue(Localizer["menu.Name"])));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Type"]} "), zoneTypes));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Teams"]} "), teams, true));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Name"]} ")));
 
             addZoneMenu.AddItem(_playerData[controller].AddZone!.Items[0].Option != 0
-                ? new MenuItem(MenuItemType.Input, new MenuValue(Localizer["menu.Delay"]), new MenuValue(Localizer["menu.Seconds"]))
+                ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Delay"]} "), new MenuValue($" {Localizer["menu.Seconds"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 
             addZoneMenu.AddItem(_playerData[controller].AddZone!.Items[0].Option == 1
-                ? new MenuItem(MenuItemType.Input, new MenuValue(Localizer["menu.Damage"]))
+                ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Damage"]} "), new MenuValue($" {Localizer["menu.PerSecond"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], SaveZone) { Prefix = "<font color=\"#ADD8E6\">" }]));
@@ -146,6 +147,7 @@ public partial class AntiRush
         {
             addZoneMenu.Points = _playerData[controller].AddZone!.Points;
             addZoneMenu.Option = _playerData[controller].AddZone!.Option;
+            addZoneMenu.LastShot = _playerData[controller].AddZone!.LastShot;
 
             for (var i = 0; i < _playerData[controller].AddZone!.Items.Count; i++)
             {
@@ -202,4 +204,5 @@ public class CustomButton(string value, Action<CCSPlayerController> callback) : 
 public class AddZoneMenu(MenuValue title) : MenuBase(title)
 {
     public Vector[] Points { get; set; } = [Vector.Zero, Vector.Zero];
+    public float LastShot { get; set; }
 }

@@ -1,7 +1,7 @@
-﻿using AntiRush.Enums;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using AntiRush.Enums;
 
 namespace AntiRush;
 
@@ -29,17 +29,6 @@ public partial class AntiRush : BasePlugin
         Server.ExecuteCommand("mp_restartgame 1");
     }
 
-    private void BouncePlayer(CCSPlayerController controller)
-    {
-        var pos = _playerData[controller].LastPosition;
-        var vel = _playerData[controller].LastVelocity;
-        var speed = Math.Sqrt(vel.X * vel.X + vel.Y * vel.Y);
-
-        vel *= (-350 / (float)speed);
-        vel.Z = vel.Z <= 0f ? 150f : Math.Max(vel.Z, 150f);
-        controller.PlayerPawn.Value!.Teleport(pos, controller.PlayerPawn!.Value.EyeAngles, vel);
-    }
-
     private void SaveZone(CCSPlayerController controller)
     {
         var menu = _playerData[controller].AddZone;
@@ -52,17 +41,89 @@ public partial class AntiRush : BasePlugin
             _ => []
         };
 
+        var zoneType = (ZoneType)menu.Items[0].Option;
         var minPoint = new Vector(Math.Min(menu.Points[0].X, menu.Points[1].X), Math.Min(menu.Points[0].Y, menu.Points[1].Y), Math.Min(menu.Points[0].Z, menu.Points[1].Z));
         var maxPoint = new Vector(Math.Max(menu.Points[0].X, menu.Points[1].X), Math.Max(menu.Points[0].Y, menu.Points[1].Y), Math.Max(menu.Points[0].Z, menu.Points[1].Z));
+        var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? valueDelay : 0;
+        var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 10;
+        var name = menu.Items[2].DataString;
 
-        if (!float.TryParse(menu.Items[3].DataString, out var delay))
-            delay = 0.0f;
+        if (name.Length == 0)
+            name = "noname";
 
-        if (!int.TryParse(menu.Items[4].DataString, out var damage))
-            damage = 10;
-
-        var zone = new Zone((ZoneType)menu.Items[0].Option, teams, minPoint, maxPoint, menu.Items[2].DataString, delay, damage);
+        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
         _zones.Add(zone);
+
+        var printMessage = $"{Prefix}{Localizer["saving", name, FormatZoneString(zoneType)]} | {Localizer["menu.Teams"]} [";
+
+        if (teams.Contains(CsTeam.Terrorist))
+            printMessage += $" {ChatColors.LightYellow}{Localizer["t"]}{ChatColors.White}";
+
+        if (teams.Contains(CsTeam.CounterTerrorist))
+            printMessage += $" {ChatColors.Blue}{Localizer["ct"]}{ChatColors.White}";
+
+        printMessage += " ]";
+
+        if (zoneType != ZoneType.Bounce)
+            printMessage += $" | {Localizer["menu.Delay"]} {ChatColors.Green}{delay}{ChatColors.White}";
+
+        if (zoneType == ZoneType.Hurt)
+            printMessage += $" | {Localizer["menu.Damage"]} {ChatColors.Green}{damage}{ChatColors.White}";
+
+        controller.PrintToChat(printMessage);
+    }
+
+    private bool DoAction(CCSPlayerController controller, Zone zone)
+    {
+        if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage > 1)
+            controller!.PrintToChat($"{Prefix}{FormatZoneString(zone.Type)}");
+
+        _playerData[controller].LastMessage = Server.CurrentTime;
+
+        switch (zone.Type)
+        {
+            case ZoneType.Bounce:
+                var speed = Math.Sqrt(_playerData[controller].LastVelocity.X * _playerData[controller].LastVelocity.X + _playerData[controller].LastVelocity.Y * _playerData[controller].LastVelocity.Y);
+
+                _playerData[controller].LastVelocity *= (-350 / (float)speed);
+                _playerData[controller].LastVelocity.Z = _playerData[controller].LastVelocity.Z <= 0f ? 150f : Math.Min(_playerData[controller].LastVelocity.Z, 150f);
+                controller.PlayerPawn.Value!.Teleport(_playerData[controller].LastPosition, controller.PlayerPawn!.Value.EyeAngles, _playerData[controller].LastVelocity);
+                return true;
+
+            case ZoneType.Hurt:
+                if (Server.CurrentTime % 1 != 0)
+                    return false;
+
+                controller.PlayerPawn.Value!.Health -= zone.Damage;
+                Utilities.SetStateChanged(controller.PlayerPawn.Value, "CBaseEntity", "m_iHealth");
+
+                if (controller.PlayerPawn.Value.Health <= 0)
+                    controller.PlayerPawn.Value.CommitSuicide(true, true);
+
+                return false;
+
+            case ZoneType.Kill:
+                controller.PlayerPawn.Value!.CommitSuicide(true, true);
+                return false;
+
+            case ZoneType.Teleport:
+                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn!.Value.EyeAngles, Vector.Zero);
+                return false;
+        }
+
+        return false;
+    }
+
+    private string FormatZoneString(ZoneType type)
+    {
+        return type switch
+        {
+            ZoneType.Bounce => $"{ChatColors.Yellow}{Localizer["zone.Bounce"]}{ChatColors.White}",
+            ZoneType.Hurt => $"{ChatColors.Orange}{Localizer["zone.Hurt"]}{ChatColors.White}",
+            ZoneType.Kill => $"{ChatColors.Red}{Localizer["zone.Kill"]}{ChatColors.White}",
+            ZoneType.Teleport => $"{ChatColors.Magenta}{Localizer["zone.Teleport"]}{ChatColors.White}",
+            _ => ""
+        };
     }
 
     private static bool IsValidPlayer(CCSPlayerController? player)

@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
@@ -29,6 +30,11 @@ public partial class AntiRush
 
         if (!value.AddZone.Points[0].IsZero() && !value.AddZone.Points[1].IsZero())
             return HookResult.Continue;
+
+        if (Server.CurrentTime - value.AddZone.LastShot < 0.1)
+            return HookResult.Continue;
+
+        value.AddZone.LastShot = Server.CurrentTime;
 
         if (value.AddZone.Points[0].IsZero())
             value.AddZone.Points[0] = new Vector(@event.X, @event.Y, @event.Z);

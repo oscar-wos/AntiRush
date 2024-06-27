@@ -11,4 +11,5 @@ public class PlayerData
     public bool Debug { get; set; }
     public bool[] DebugOptions { get; set; } = new bool[Enum.GetValues(typeof(ZoneType)).Length];
     public AddZoneMenu? AddZone { get; set; } = null;
+    public float LastMessage { get; set; }
 }
