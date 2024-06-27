@@ -9,11 +9,16 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                submodules: true
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: '8.0.x'
+
+            - name: Restore dependencies
+              run: dotnet restore
 
             - name: Build
               run: dotnet build -c Release
@@ -26,11 +31,16 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
+              with:
+                submodules: true
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: '8.0.x'
+
+            - name: Restore dependencies
+              run: dotnet restore
 
             - name: Build
               run: dotnet build -c Release
