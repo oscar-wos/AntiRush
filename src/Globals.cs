@@ -1,9 +1,10 @@
-﻿using AntiRush.Enums;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
 
+[MinimumApiVersion(245)]
 public partial class AntiRush
 {
     public override string ModuleName => "Anti-Rush";

@@ -13,7 +13,7 @@ public partial class AntiRush : BasePlugin
         RegisterListener<Listeners.OnMapStart>(OnMapStart);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventBulletImpact>(OnBulletImpact);
-        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
 
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
@@ -23,7 +23,7 @@ public partial class AntiRush : BasePlugin
             return;
 
         foreach (var controller in Utilities.GetPlayers())
-            _playerData.Add(controller, new PlayerData());
+            _playerData[controller] = new PlayerData();
 
         LoadJson(Server.MapName);
         Server.ExecuteCommand("mp_restartgame 1");
@@ -40,24 +40,17 @@ public partial class AntiRush : BasePlugin
         controller.PlayerPawn.Value!.Teleport(pos, controller.PlayerPawn!.Value.EyeAngles, vel);
     }
 
-    private void SaveZone(AddZoneMenu menu)
+    private void SaveZone(CCSPlayerController controller)
     {
-        CsTeam[] teams = [];
+        var menu = _playerData[controller].AddZone;
 
-        switch (menu.Items[1].Option)
+        CsTeam[] teams = menu!.Items[1].Option switch
         {
-            case 0:
-                teams = [CsTeam.Terrorist];
-                break;
-
-            case 1:
-                teams = [CsTeam.CounterTerrorist];
-                break;
-
-            case 2:
-                teams = [CsTeam.Terrorist, CsTeam.CounterTerrorist];
-                break;
-        }
+            0 => [CsTeam.Terrorist],
+            1 => [CsTeam.CounterTerrorist],
+            2 => [CsTeam.Terrorist, CsTeam.CounterTerrorist],
+            _ => []
+        };
 
         var minPoint = new Vector(Math.Min(menu.Points[0].X, menu.Points[1].X), Math.Min(menu.Points[0].Y, menu.Points[1].Y), Math.Min(menu.Points[0].Z, menu.Points[1].Z));
         var maxPoint = new Vector(Math.Max(menu.Points[0].X, menu.Points[1].X), Math.Max(menu.Points[0].Y, menu.Points[1].Y), Math.Max(menu.Points[0].Z, menu.Points[1].Z));
@@ -75,10 +68,5 @@ public partial class AntiRush : BasePlugin
     private static bool IsValidPlayer(CCSPlayerController? player)
     {
         return player != null && player is { IsValid: true, Connected: PlayerConnectedState.PlayerConnected, PawnIsAlive: true, IsBot: false };
-    }
-
-    private static bool VectorIsZero(Vector vector)
-    {
-        return vector is { X: 0.0f, Y: 0.0f, Z: 0.0f };
     }
 }

@@ -78,7 +78,7 @@ public partial class AntiRush
                         return;
                     }
 
-                    var customButton = (CustomButton)selectedItem!.Values![selectedItem.Option];
+                    var customButton = (CustomButton)selectedItem.Values![selectedItem.Option];
                     customButton.Callback.Invoke(controller);
                     break;
 
@@ -100,7 +100,7 @@ public partial class AntiRush
 
         if (_playerData[controller].AddZone == null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "1"])));
-        else if (VectorIsZero(_playerData[controller].AddZone!.Points[1]))
+        else if (_playerData[controller].AddZone!.Points[1].IsZero())
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "2"])));
         else
         {
@@ -131,7 +131,7 @@ public partial class AntiRush
                 ? new MenuItem(MenuItemType.Input, new MenuValue(Localizer["menu.Damage"]))
                 : new MenuItem(MenuItemType.Spacer));
 
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], c => SaveZone(_playerData[controller].AddZone!)) { Prefix = "<font color=\"#ADD8E6\">" }]));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], c => SaveZone(c)) { Prefix = "<font color=\"#ADD8E6\">" }]));
 
             addZoneMenu.Items[3].DataString = "0.0";
             addZoneMenu.Items[4].DataString = "10";
@@ -156,19 +156,19 @@ public partial class AntiRush
             if (buttons == MenuButtons.Input)
             {
                 if (menu.Option == 2 && selectedItem!.DataString.Length > 16)
-                    selectedItem!.DataString = selectedItem!.DataString[..16];
+                    selectedItem.DataString = selectedItem.DataString[..16];
 
                 if (menu.Option == 3 && !float.TryParse(selectedItem!.DataString, out _))
                 {
                     controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
-                    selectedItem.DataString = "";
+                    selectedItem.DataString = "0.0";
                     menu.AcceptInput = true;
                 }
 
                 if (menu.Option == 4 && !int.TryParse(selectedItem!.DataString, out _))
                 {
                     controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "int"]}");
-                    selectedItem.DataString = "";
+                    selectedItem.DataString = "10";
                     menu.AcceptInput = true;
                 }
             }
@@ -181,7 +181,7 @@ public partial class AntiRush
 
             if (buttons == MenuButtons.Select && selectedItem is { Type: MenuItemType.Button })
             {
-                var customButton = (CustomButton)selectedItem!.Values![selectedItem.Option];
+                var customButton = (CustomButton)selectedItem.Values![selectedItem.Option];
                 customButton.Callback.Invoke(controller);
                 Menu.ClearMenus(controller);
             }

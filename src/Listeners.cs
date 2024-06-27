@@ -6,11 +6,6 @@ namespace AntiRush;
 
 public partial class AntiRush
 {
-    private void OnMapStart(string mapName)
-    {
-        LoadJson(mapName);
-    }
-
     private void OnTick()
     {
         foreach (var controller in Utilities.GetPlayers().Where(player => player is { IsValid: true, PawnIsAlive: true }))
@@ -39,9 +34,14 @@ public partial class AntiRush
 
             if (bounce)
                 continue;
-
+            
             _playerData[controller].LastPosition = controller!.PlayerPawn.Value!.AbsOrigin!;
             _playerData[controller].LastVelocity = controller.PlayerPawn.Value.AbsVelocity;
         }
+    }
+
+    private void OnMapStart(string mapName)
+    {
+        LoadJson(mapName);
     }
 }

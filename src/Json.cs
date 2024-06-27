@@ -13,10 +13,7 @@ public partial class AntiRush
         var path = $"../../csgo/addons/counterstrikesharp/configs/plugins/Zones/{mapName}.json";
 
         if (!File.Exists(path))
-        {
-            Logger.LogError($"File {path} does not exist.");
             return;
-        }
         /*
         var json = File.ReadAllText(path);
         var obj = JsonSerializer.Deserialize<JsonBombsite>(json);
@@ -39,6 +36,17 @@ public partial class AntiRush
             ));
         }
         */
+    }
+
+    public void SaveJson(string mapName)
+    {
+        var path = $"../../csgo/addons/counterstrikesharp/configs/plugins/Zones/{mapName}.json";
+
+        if (!File.Exists(path))
+        {
+            Logger.LogError($"File {path} does not exist.");
+            return;
+        }
     }
 }
 
