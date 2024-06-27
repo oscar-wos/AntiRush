@@ -8,7 +8,7 @@
 	
 	<ItemGroup>
 		<PackageReference Include="CounterStrikeSharp.API" Version="*" ExcludeAssets="runtime" />
-		<ProjectReference Include="..\..\Menu\src\Menu.csproj" />
+		<ProjectReference Include="..\Menu\src\Menu.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -18,7 +18,7 @@
 		</Content>
 	</ItemGroup>
 
-	<Target Name="CopyCustomContent" AfterTargets="AfterBuild">
+	<Target Name="CopyCustomContent" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Debug' ">
 		<Copy SourceFiles="$(OutputPath)AntiRush.dll" DestinationFolder="\\wsl.localhost\Debian\home\user\cs2\game\csgo\addons\counterstrikesharp\plugins\AntiRush" />
 		<Copy SourceFiles="$(OutputPath)lang\en.json" DestinationFolder="\\wsl.localhost\Debian\home\user\cs2\game\csgo\addons\counterstrikesharp\plugins\AntiRush\lang" />
 	</Target>
