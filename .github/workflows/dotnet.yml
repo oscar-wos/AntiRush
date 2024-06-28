@@ -61,13 +61,12 @@ jobs:
 
             - name: Zip
               run: |
-                ls -a
                 zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip ./plugin
 
             - name: Extract version and create tag
               id: extract_version
               run: |
-                version="1.0.0"
+                version=$(grep -oP 'public override string ModuleVersion => "\K(.*)(?=";)' ./src/Globals.cs)
                 echo "Version found: $version"
                 git config --global user.email "actions@github.com"
                 git config --global user.name "GitHub Actions"

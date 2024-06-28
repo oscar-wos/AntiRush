@@ -13,6 +13,6 @@ public partial class AntiRush
     public Menu.Menu Menu { get; } = new();
 
     private string Prefix { get; } = $"[{ChatColors.Lime}AntiRush{ChatColors.White}] ";
-    private readonly List<Zone> _zones = [];
+    private List<Zone> _zones = [];
     private readonly Dictionary<CCSPlayerController, PlayerData> _playerData = [];
 }

@@ -13,10 +13,10 @@ public partial class AntiRush
         if (controller == null || !controller.IsValid)
             return HookResult.Continue;
 
-        if (!_playerData.ContainsKey(controller!))
-            _playerData[controller!] = new PlayerData();
+        if (!_playerData.ContainsKey(controller))
+            _playerData[controller] = new PlayerData();
 
-        _playerData[controller!].SpawnPos = new Vector(controller!.PlayerPawn!.Value!.AbsOrigin!.X, controller!.PlayerPawn!.Value!.AbsOrigin.Y, controller!.PlayerPawn!.Value!.AbsOrigin.Z);
+        _playerData[controller].SpawnPos = new Vector(controller.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
 
         return HookResult.Continue;
     }
@@ -38,7 +38,7 @@ public partial class AntiRush
 
         if (value.AddZone.Points[0].IsZero())
             value.AddZone.Points[0] = new Vector(@event.X, @event.Y, @event.Z);
-        else if (value.AddZone.Points[1].IsZero())
+        else
         {
             value.AddZone.Points[1] = new Vector(@event.X, @event.Y, @event.Z);
 
@@ -66,7 +66,7 @@ public partial class AntiRush
         if (controller == null || !controller.IsValid)
             return HookResult.Continue;
 
-        if (!_playerData.ContainsKey(controller!))
+        if (!_playerData.ContainsKey(controller))
             _playerData[controller] = new PlayerData();
 
         return HookResult.Continue;

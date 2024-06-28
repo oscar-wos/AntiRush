@@ -13,7 +13,7 @@ public partial class AntiRush
 
             foreach (var zone in _zones)
             {
-                var isInZone = zone.IsInZone(controller!.PlayerPawn.Value!.AbsOrigin!);
+                var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);
 
                 if (!isInZone)
                 {
@@ -21,11 +21,11 @@ public partial class AntiRush
                     continue;
                 }
 
-                if (!zone.Entry.ContainsKey(controller))
-                    zone.Entry[controller] = Server.CurrentTime;
-
                 if (!zone.Teams.Contains(controller.Team))
                     continue;
+
+                if (!zone.Entry.ContainsKey(controller))
+                    zone.Entry[controller] = Server.CurrentTime;
 
                 if (zone.Delay != 0)
                 {
@@ -36,7 +36,7 @@ public partial class AntiRush
                         var diffString = diff % 1;
 
                         if (diffString.ToString("0.00") is ("0.00" or "0.01") && diff >= 1.0)
-                            controller!.PrintToChat($"{Prefix}{Localizer["delayRemaining", FormatZoneString(zone.Type), diff.ToString("0")]}");
+                            controller.PrintToChat($"{Prefix}{Localizer["delayRemaining", FormatZoneString(zone.Type), diff.ToString("0")]}");
                     }
                     else
                         bounce = DoAction(controller, zone);
@@ -50,7 +50,7 @@ public partial class AntiRush
             if (bounce)
                 continue;
 
-            _playerData[controller].LastPosition = new Vector(controller!.PlayerPawn.Value!.AbsOrigin!.X, controller!.PlayerPawn.Value!.AbsOrigin!.Y, controller!.PlayerPawn.Value!.AbsOrigin!.Z);
+            _playerData[controller].LastPosition = new Vector(controller.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
             _playerData[controller].LastVelocity = new Vector(controller.PlayerPawn.Value.AbsVelocity.X, controller.PlayerPawn.Value.AbsVelocity.Y, controller.PlayerPawn.Value.AbsVelocity.Z);
         }
     }

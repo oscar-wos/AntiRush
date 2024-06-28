@@ -17,7 +17,7 @@ public partial class AntiRush : BasePlugin
 
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
-        AddCommand("css_viewzones", "View Zones", CommandViewZones);
+        //AddCommand("css_viewzones", "View Zones", CommandViewZones);
 
         if (!isReload)
             return;
@@ -44,25 +44,22 @@ public partial class AntiRush : BasePlugin
         var zoneType = (ZoneType)menu.Items[0].Option;
         var minPoint = new Vector(Math.Min(menu.Points[0].X, menu.Points[1].X), Math.Min(menu.Points[0].Y, menu.Points[1].Y), Math.Min(menu.Points[0].Z, menu.Points[1].Z));
         var maxPoint = new Vector(Math.Max(menu.Points[0].X, menu.Points[1].X), Math.Max(menu.Points[0].Y, menu.Points[1].Y), Math.Max(menu.Points[0].Z, menu.Points[1].Z));
-        var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? valueDelay : 0;
+        var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? (float)Math.Floor(valueDelay * 10) / 10 : 0;
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 10;
         var name = menu.Items[2].DataString;
 
         if (name.Length == 0)
             name = "noname";
 
-        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
-        _zones.Add(zone);
-
         var printMessage = $"{Prefix}{Localizer["saving", name, FormatZoneString(zoneType)]} | {Localizer["menu.Teams"]} [";
 
         if (teams.Contains(CsTeam.Terrorist))
-            printMessage += $" {ChatColors.LightYellow}{Localizer["t"]}{ChatColors.White}";
+            printMessage += $"{ChatColors.LightYellow}{Localizer["t"]}{ChatColors.White}";
 
         if (teams.Contains(CsTeam.CounterTerrorist))
-            printMessage += $" {ChatColors.Blue}{Localizer["ct"]}{ChatColors.White}";
+            printMessage += $"{(teams.Contains(CsTeam.Terrorist) ? "|" : "")}{ChatColors.Blue}{Localizer["ct"]}{ChatColors.White}";
 
-        printMessage += " ]";
+        printMessage += "]";
 
         if (zoneType != ZoneType.Bounce)
             printMessage += $" | {Localizer["menu.Delay"]} {ChatColors.Green}{delay}{ChatColors.White}";
@@ -71,12 +68,16 @@ public partial class AntiRush : BasePlugin
             printMessage += $" | {Localizer["menu.Damage"]} {ChatColors.Green}{damage}{ChatColors.White}";
 
         controller.PrintToChat(printMessage);
+
+        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
+        _zones.Add(zone);
+        SaveJson(Server.MapName);
     }
 
     private bool DoAction(CCSPlayerController controller, Zone zone)
     {
         if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
-            controller!.PrintToChat($"{Prefix}{FormatZoneString(zone.Type)}");
+            controller.PrintToChat($"{Prefix}{FormatZoneString(zone.Type)}");
 
         _playerData[controller].LastMessage = Server.CurrentTime;
 
@@ -87,7 +88,7 @@ public partial class AntiRush : BasePlugin
 
                 _playerData[controller].LastVelocity *= (-350 / (float)speed);
                 _playerData[controller].LastVelocity.Z = _playerData[controller].LastVelocity.Z <= 0f ? 150f : Math.Min(_playerData[controller].LastVelocity.Z, 150f);
-                controller.PlayerPawn.Value!.Teleport(_playerData[controller].LastPosition, controller.PlayerPawn!.Value.EyeAngles, _playerData[controller].LastVelocity);
+                controller.PlayerPawn.Value!.Teleport(_playerData[controller].LastPosition, controller.PlayerPawn.Value.EyeAngles, _playerData[controller].LastVelocity);
                 return true;
 
             case ZoneType.Hurt:
@@ -107,7 +108,7 @@ public partial class AntiRush : BasePlugin
                 return false;
 
             case ZoneType.Teleport:
-                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn!.Value.EyeAngles, Vector.Zero);
+                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
                 return false;
         }
 

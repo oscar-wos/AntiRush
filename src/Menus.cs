@@ -34,6 +34,7 @@ public partial class AntiRush
                 break;
 
             case MenuType.View:
+                BuildViewZoneMenu(controller);
                 break;
         }
     }
@@ -44,15 +45,16 @@ public partial class AntiRush
 
         var customButtons = new List<MenuValue>
         {
-            new CustomButton(Localizer["menu.Add"], c => BuildMenu(c, MenuType.Add)) { Suffix = "<font color=\"#FFFFFF\">" },
-            new CustomButton(Localizer["menu.View"], c=> BuildMenu(c, MenuType.View))
+            new CustomButton(Localizer["menu.Add"], c => BuildMenu(c, MenuType.Add)) { Suffix = "<font color=\"#FFFFFF\">" }
         };
+
+        // new CustomButton(Localizer["menu.View"], c=> BuildMenu(c, MenuType.View))
 
         customButtons[0].Prefix = !AdminManager.PlayerHasPermissions(controller, "@css/root") ? "<font color=\"#808080\">" : "";
 
         mainMenu.AddItem(new MenuItem(MenuItemType.Button, customButtons));
-        mainMenu.AddItem(new MenuItem(MenuItemType.Spacer));
-        mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue($"{Localizer["menu.Debug"]} ")) { Data = [_playerData[controller].Debug ? 1 : 0] });
+        //mainMenu.AddItem(new MenuItem(MenuItemType.Spacer));
+        //mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue($"{Localizer["menu.Debug"]} ")) { Data = [_playerData[controller].Debug ? 1 : 0] });
 
         if (_playerData[controller].Debug)
         {
@@ -137,7 +139,7 @@ public partial class AntiRush
                 ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Damage"]} "), new MenuValue($" {Localizer["menu.PerSecond"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], SaveZone) { Prefix = "<font color=\"#ADD8E6\">" }]));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new CustomButton(Localizer["menu.Save"], SaveZone)]));
 
             addZoneMenu.Items[3].DataString = "0.0";
             addZoneMenu.Items[4].DataString = "10";
@@ -165,11 +167,17 @@ public partial class AntiRush
                 if (menu.Option == 2 && selectedItem!.DataString.Length > 16)
                     selectedItem.DataString = selectedItem.DataString[..16];
 
-                if (menu.Option == 3 && !float.TryParse(selectedItem!.DataString, out _))
+                if (menu.Option == 3)
                 {
-                    controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
-                    selectedItem.DataString = "0.0";
-                    menu.AcceptInput = true;
+                    if (!float.TryParse(selectedItem!.DataString, out var delay))
+                    {
+                        controller.PrintToChat(
+                            $"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
+                        selectedItem.DataString = "0.0";
+                        menu.AcceptInput = true;
+                    }
+                    else
+                        selectedItem.DataString = delay.ToString("0.0");
                 }
 
                 if (menu.Option == 4 && !int.TryParse(selectedItem!.DataString, out _))
@@ -194,6 +202,27 @@ public partial class AntiRush
             }
         }); 
     }
+
+    private void BuildViewZoneMenu(CCSPlayerController controller)
+    {
+        var viewZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.View"]) { Suffix = "<font class=\"fontSize-m\">" });
+
+        if (_zones.Count == 0)
+            viewZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.None"])));
+        else
+        {
+            var zones = _zones.Select(zone => new ZoneValue(zone.Name, zone)).Cast<MenuValue>().ToList();
+            viewZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, zones, true));
+
+            viewZoneMenu.AddItem(new MenuItem(MenuItemType.Spacer));
+            viewZoneMenu.AddItem(new MenuItem(MenuItemType.Button, [new MenuValue(Localizer["menu.Teleport"]), new MenuValue(Localizer["menu.Delete"])]));
+        }
+
+        Menu.AddMenu(controller, viewZoneMenu, (buttons, menu, selectedItem) =>
+        {
+
+        });
+    }
 }
 
 public class CustomButton(string value, Action<CCSPlayerController> callback) : MenuValue(value)
@@ -205,4 +234,9 @@ public class AddZoneMenu(MenuValue title) : MenuBase(title)
 {
     public Vector[] Points { get; set; } = [Vector.Zero, Vector.Zero];
     public float LastShot { get; set; }
+}
+
+public class ZoneValue(string title, Zone zone) : MenuValue(title)
+{
+    public Zone Zone { get; set; } = zone;
 }
