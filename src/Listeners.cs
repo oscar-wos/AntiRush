@@ -7,7 +7,7 @@ public partial class AntiRush
 {
     private void OnTick()
     {
-        foreach (var controller in Utilities.GetPlayers().Where(player => player is { IsValid: true, PawnIsAlive: true }))
+        foreach (var controller in Utilities.GetPlayers().Where(player => player is { IsValid: true, PawnIsAlive: true } && _playerData.ContainsKey(player)))
         {
             var bounce = false;
 
