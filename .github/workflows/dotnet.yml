@@ -61,7 +61,8 @@ jobs:
 
             - name: Zip
               run: |
-                zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip ./plugin
+                cd ./plugin/
+                zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
 
             - name: Extract version and create tag
               id: extract_version
