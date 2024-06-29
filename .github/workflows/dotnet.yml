@@ -47,21 +47,21 @@ jobs:
 
             - name: Create Directories
               run: |
-                mkdir -p ./plugin/plugins/${{ github.event.repository.name }}
-                mkdir -p ./plugin/shared/Menu
+                mkdir -p plugin/plugins/${{ github.event.repository.name }}
+                mkdir -p plugin/shared/Menu
 
             - name: Move Files
               run: |
-                mv ./src/bin/Release/net8.0/* ./plugin/plugins/${{ github.event.repository.name }}
-                mv ./Menu/src/bin/Release/net8.0/* ./plugin/shared/Menu
+                mv ./src/bin/Release/net8.0/* plugin/plugins/${{ github.event.repository.name }}
+                mv ./Menu/src/bin/Release/net8.0/* plugin/shared/Menu
 
             - name: Remove .API
               run: |
-                rm ./plugin/plugins/${{ github.event.repository.name }}/Menu.*
+                rm plugin/plugins/${{ github.event.repository.name }}/Menu.*
 
             - name: Zip
               run: |
-                cd ./plugin/
+                cd plugin/
                 zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
 
             - name: Extract version
@@ -76,17 +76,12 @@ jobs:
                 name: ${{ github.event.repository.name }}-${{ github.sha }}
                 path: plugin
 
-            - name: Extract branch name
-              shell: bash
-              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-              id: extract_branch
-
             - name: Create Tag
               run: |
                 git config --global user.email "actions@github.com"
                 git config --global user.name "GitHub Actions"
                 git tag ${{ env.version }}
-                git push origin ${{ steps.extract_branch.outputs.branch }} ${{ env.version }}
+                git push origin ${{ env.version }}
 
             - name: Create Release
               id: create_release
