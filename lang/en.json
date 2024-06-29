@@ -5,7 +5,7 @@
   "missingPermission": "Missing permission: {red}{0}",
   "invalidInput": "Invalid input: '{lightred}{0}{default}' ({orange}{1}{default})",
   "delayRemaining": "{0} in {1} second(s)",
-  "saving": "Saving zone '{0}' {1}",
+  "saving": "Saving zone {0} \"{1\"",
   "zone.Bounce": "Bounce",
   "zone.Hurt": "Hurt",
   "zone.Kill": "Kill",

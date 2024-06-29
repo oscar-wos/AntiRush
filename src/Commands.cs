@@ -9,7 +9,7 @@ public partial class AntiRush
 {
     public void CommandAntiRush(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!IsValidPlayer(controller))
+        if (!controller!.IsValid(true))
             return;
 
         if (!AdminManager.PlayerHasPermissions(controller, "@css/generic"))
@@ -23,7 +23,7 @@ public partial class AntiRush
 
     public void CommandAddZone(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!IsValidPlayer(controller))
+        if (!controller!.IsValid(true))
             return;
 
         if (!AdminManager.PlayerHasPermissions(controller, "@css/root"))
@@ -38,7 +38,7 @@ public partial class AntiRush
 
     public void CommandViewZones(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!IsValidPlayer(controller))
+        if (!controller!.IsValid(true))
             return;
 
         if (!AdminManager.PlayerHasPermissions(controller, "@css/generic"))

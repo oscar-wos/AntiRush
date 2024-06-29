@@ -54,7 +54,7 @@ public partial class AntiRush : BasePlugin
         if (name.Length == 0)
             name = "noname";
 
-        var printMessage = $"{Prefix}{Localizer["saving", name, zone.ToString(Localizer)]} | {Localizer["menu.Teams"]} [";
+        var printMessage = $"{Prefix}{Localizer["saving", zone.ToString(Localizer), name]} | {Localizer["menu.Teams"]} [";
 
         if (teams.Contains(CsTeam.Terrorist))
             printMessage += $"{ChatColors.LightYellow}{Localizer["t"]}{ChatColors.White}";
@@ -77,30 +77,22 @@ public partial class AntiRush : BasePlugin
     private bool DoAction(CCSPlayerController controller, Zone zone)
     {
         if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
+        {
             controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
-
-        _playerData[controller].LastMessage = Server.CurrentTime;
+            _playerData[controller].LastMessage = Server.CurrentTime;
+        }
 
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                var speed = Math.Sqrt(_playerData[controller].LastVelocity.X * _playerData[controller].LastVelocity.X + _playerData[controller].LastVelocity.Y * _playerData[controller].LastVelocity.Y);
-
-                _playerData[controller].LastVelocity *= (-350 / (float)speed);
-                _playerData[controller].LastVelocity.Z = _playerData[controller].LastVelocity.Z <= 0f ? 150f : Math.Min(_playerData[controller].LastVelocity.Z, 150f);
-                controller.PlayerPawn.Value!.Teleport(_playerData[controller].LastPosition, controller.PlayerPawn.Value.EyeAngles, _playerData[controller].LastVelocity);
+                controller.Bounce();
                 return true;
 
             case ZoneType.Hurt:
                 if (Server.CurrentTime % 1 != 0)
                     return false;
 
-                controller.PlayerPawn.Value!.Health -= zone.Damage;
-                Utilities.SetStateChanged(controller.PlayerPawn.Value, "CBaseEntity", "m_iHealth");
-
-                if (controller.PlayerPawn.Value.Health <= 0)
-                    controller.PlayerPawn.Value.CommitSuicide(true, true);
-
+                controller.Damage(zone.Damage);
                 return false;
 
             case ZoneType.Kill:
@@ -113,10 +105,5 @@ public partial class AntiRush : BasePlugin
         }
 
         return false;
-    }
-
-    private static bool IsValidPlayer(CCSPlayerController? player)
-    {
-        return player != null && player is { IsValid: true, Connected: PlayerConnectedState.PlayerConnected, PawnIsAlive: true, IsBot: false };
     }
 }

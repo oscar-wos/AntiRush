@@ -34,7 +34,7 @@ public partial class AntiRush
 
     public void SaveJson(string mapName)
     {
-        var path = $"../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/";
+        var path = "../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/";
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
