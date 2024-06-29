@@ -15,22 +15,20 @@ public partial class AntiRush
             {
                 var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);
 
+                if (!zone.Data.TryGetValue(controller, out _))
+                    zone.Data[controller] = new ZoneData();
+
                 if (!isInZone)
                 {
-                    if (!zone.Data.TryGetValue(controller, out _))
-                        zone.Data[controller] = new ZoneData();
-
+                    zone.Data[controller].Entry = 0;
                     zone.Data[controller].Exit = Server.CurrentTime;
                     continue;
                 }
 
+                zone.Data[controller].Entry = Server.CurrentTime;
+
                 if (!zone.Teams.Contains(controller.Team))
                     continue;
-
-                if (!zone.Data.TryGetValue(controller, out _))
-                    zone.Data[controller] = new ZoneData();
-
-                zone.Data[controller].Entry = Server.CurrentTime;
 
                 if (zone.Delay != 0)
                 {
