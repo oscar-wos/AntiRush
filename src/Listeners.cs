@@ -11,7 +11,7 @@ public partial class AntiRush
         {
             var bounce = false;
 
-            foreach (var (zone, zoneData) in _zones.Select(zone => (zone, zone.Data)).ToArray())
+            foreach (var zone in _zones)
             {
                 var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);
 

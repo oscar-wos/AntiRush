@@ -66,7 +66,7 @@ public partial class AntiRush
             jsonZones.Add(jsonObject);
         }
 
-        var json = JsonSerializer.Serialize(jsonZones);
+        var json = JsonSerializer.Serialize(jsonZones, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(path, json);
     }
 }
