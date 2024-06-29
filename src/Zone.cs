@@ -13,7 +13,7 @@ public class Zone(ZoneType type, CsTeam[] teams, Vector minPoint, Vector maxPoin
     public string Name { get; init; } = name;
     public float Delay { get; init; } = delay;
     public int Damage { get; init; } = damage;
-    public Dictionary<CCSPlayerController, float> Entry { get; } = [];
+    public Dictionary<CCSPlayerController, ZoneData> Data { get; } = [];
 
     public bool IsInZone(Vector point)
     {

@@ -11,31 +11,36 @@ public partial class AntiRush
         {
             var bounce = false;
 
-            foreach (var zone in _zones)
+            foreach (var (zone, zoneData) in _zones.Select(zone => (zone, zone.Data)).ToArray())
             {
                 var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);
 
                 if (!isInZone)
                 {
-                    zone.Entry.Remove(controller);
+                    if (!zone.Data.TryGetValue(controller, out _))
+                        zone.Data[controller] = new ZoneData();
+
+                    zone.Data[controller].Exit = Server.CurrentTime;
                     continue;
                 }
 
                 if (!zone.Teams.Contains(controller.Team))
                     continue;
 
-                if (!zone.Entry.ContainsKey(controller))
-                    zone.Entry[controller] = Server.CurrentTime;
+                if (!zone.Data.TryGetValue(controller, out _))
+                    zone.Data[controller] = new ZoneData();
+
+                zone.Data[controller].Entry = Server.CurrentTime;
 
                 if (zone.Delay != 0)
                 {
-                    var diff = (zone.Entry[controller] + zone.Delay) - Server.CurrentTime;
+                    var diff = (zone.Data[controller].Entry + zone.Delay) - Server.CurrentTime;
 
                     if (diff > 0)
                     {
                         var diffString = diff % 1;
 
-                        if (diffString.ToString("0.00") is ("0.00" or "0.01") && diff >= 1.0)
+                        if (diffString.ToString("0.00") is ("0.00" or "0.01") && diff >= 1)
                             controller.PrintToChat($"{Prefix}{Localizer["delayRemaining", FormatZoneString(zone.Type), diff.ToString("0")]}");
                     }
                     else
