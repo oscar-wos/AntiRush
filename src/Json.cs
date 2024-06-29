@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
+﻿using CounterStrikeSharp.API.Modules.Utils;
+using System.Text.Json;
 using AntiRush.Enums;
-using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
 
@@ -46,27 +46,20 @@ public partial class AntiRush
 
         List<JsonZone> jsonZones = [];
 
-        foreach (var zone in _zones)
-        {
-            var teams = zone.Teams.Select(team => (int)team).ToArray();
-            var minPoint = new[] { zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z };
-            var maxPoint = new[] { zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z };
-
-            var jsonObject = new JsonZone()
+        jsonZones.AddRange(from zone in _zones
+            select new JsonZone()
             {
                 name = zone.Name,
                 type = (int)zone.Type,
-                teams = teams,
-                x = minPoint,
-                y = maxPoint,
                 delay = zone.Delay,
-                damage = zone.Damage
-            };
+                damage = zone.Damage,
+                teams = zone.Teams.Select(team => (int)team).ToArray(),
+                x = [zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z],
+                y = [zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z]
+            }
+        );
 
-            jsonZones.Add(jsonObject);
-        }
-
-        var json = JsonSerializer.Serialize(jsonZones, new JsonSerializerOptions { WriteIndented = true });
+        var json = JsonSerializer.Serialize(jsonZones, new JsonSerializerOptions() { WriteIndented = true });
         File.WriteAllText(path, json);
     }
 }
