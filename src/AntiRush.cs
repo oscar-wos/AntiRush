@@ -45,13 +45,16 @@ public partial class AntiRush : BasePlugin
         var minPoint = new Vector(Math.Min(menu.Points[0].X, menu.Points[1].X), Math.Min(menu.Points[0].Y, menu.Points[1].Y), Math.Min(menu.Points[0].Z, menu.Points[1].Z));
         var maxPoint = new Vector(Math.Max(menu.Points[0].X, menu.Points[1].X), Math.Max(menu.Points[0].Y, menu.Points[1].Y), Math.Max(menu.Points[0].Z, menu.Points[1].Z));
         var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? (float)Math.Floor(valueDelay * 10) / 10 : 0;
-        var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 10;
+        var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
+
+        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
+        _zones.Add(zone);
 
         if (name.Length == 0)
             name = "noname";
 
-        var printMessage = $"{Prefix}{Localizer["saving", name, FormatZoneString(zoneType)]} | {Localizer["menu.Teams"]} [";
+        var printMessage = $"{Prefix}{Localizer["saving", name, zone.ToString(Localizer)]} | {Localizer["menu.Teams"]} [";
 
         if (teams.Contains(CsTeam.Terrorist))
             printMessage += $"{ChatColors.LightYellow}{Localizer["t"]}{ChatColors.White}";
@@ -68,16 +71,13 @@ public partial class AntiRush : BasePlugin
             printMessage += $" | {Localizer["menu.Damage"]} {ChatColors.Green}{damage}{ChatColors.White}";
 
         controller.PrintToChat(printMessage);
-
-        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
-        _zones.Add(zone);
         SaveJson(Server.MapName);
     }
 
     private bool DoAction(CCSPlayerController controller, Zone zone)
     {
         if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
-            controller.PrintToChat($"{Prefix}{FormatZoneString(zone.Type)}");
+            controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
 
         _playerData[controller].LastMessage = Server.CurrentTime;
 
@@ -113,18 +113,6 @@ public partial class AntiRush : BasePlugin
         }
 
         return false;
-    }
-
-    private string FormatZoneString(ZoneType type)
-    {
-        return type switch
-        {
-            ZoneType.Bounce => $"{ChatColors.Yellow}{Localizer["zone.Bounce"]}{ChatColors.White}",
-            ZoneType.Hurt => $"{ChatColors.Orange}{Localizer["zone.Hurt"]}{ChatColors.White}",
-            ZoneType.Kill => $"{ChatColors.Red}{Localizer["zone.Kill"]}{ChatColors.White}",
-            ZoneType.Teleport => $"{ChatColors.Magenta}{Localizer["zone.Teleport"]}{ChatColors.White}",
-            _ => ""
-        };
     }
 
     private static bool IsValidPlayer(CCSPlayerController? player)

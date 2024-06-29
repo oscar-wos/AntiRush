@@ -94,7 +94,7 @@ jobs:
                   body: |
                       This is an automated release.
                   draft: false
-                  prerelease: true
+                  prerelease: false
 
             - name: Upload Release Asset
               id: upload_release_asset
