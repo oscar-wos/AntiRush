@@ -49,11 +49,11 @@ public partial class AntiRush : BasePlugin
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
 
-        var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
-        _zones.Add(zone);
-
         if (name.Length == 0)
             name = "noname";
+
+        var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
+        _zones.Add(zone);
 
         var printMessage = $"{Prefix}{Localizer["saving", zone.ToString(Localizer), name]} | {Localizer["menu.Teams"]} [";
 
