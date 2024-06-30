@@ -79,8 +79,11 @@ public partial class AntiRush : BasePlugin
     {
         if (Server.CurrentTime - _playerData[controller].LastMessage >= 1)
         {
-            controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
-            _playerData[controller].LastMessage = Server.CurrentTime;
+            if ((zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 == 0) || zone.Type != ZoneType.Hurt)
+            {
+                controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
+                _playerData[controller].LastMessage = Server.CurrentTime;
+            }
         }
 
         switch (zone.Type)

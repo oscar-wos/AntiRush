@@ -9,28 +9,16 @@ public partial class AntiRush
 {
     public void CommandAntiRush(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!controller!.IsValid(true))
+        if (!controller!.IsValid(true) || !controller.HasPermission("@css/generic")) 
             return;
-
-        if (!AdminManager.PlayerHasPermissions(controller, "@css/generic"))
-        {
-            controller!.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/generic"]}");
-            return;
-        }
 
         BuildMenu(controller!);
     }
 
     public void CommandAddZone(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!controller!.IsValid(true))
+        if (!controller!.IsValid(true) || !controller.HasPermission("@css/root"))
             return;
-
-        if (!AdminManager.PlayerHasPermissions(controller, "@css/root"))
-        {
-            controller!.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/root"]}");
-            return;
-        }
 
         BuildMenu(controller!);
         BuildMenu(controller!, MenuType.Add);
@@ -38,14 +26,8 @@ public partial class AntiRush
 
     public void CommandViewZones(CCSPlayerController? controller, CommandInfo info)
     {
-        if (!controller!.IsValid(true))
+        if (!controller!.IsValid(true) || !controller.HasPermission("@css/generic"))
             return;
-
-        if (!AdminManager.PlayerHasPermissions(controller, "@css/generic"))
-        {
-            controller!.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/generic"]}");
-            return;
-        }
 
         BuildMenu(controller!);
         BuildMenu(controller!, MenuType.View);

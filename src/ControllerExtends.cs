@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
 
 namespace AntiRush;
 
@@ -34,7 +35,12 @@ public static class ControllerExtends
         var speed = Math.Sqrt(vel.X * vel.X + vel.Y * vel.Y);
 
         vel *= (-350 / (float)speed);
-        vel.Z = vel.Z <= 0f ? 150f : Math.Min(vel.Z, 150f);
+        vel.Z = vel.Z <= 0 ? 150 : Math.Min(vel.Z, 150);
         controller.PlayerPawn.Value.Teleport(controller.PlayerPawn.Value.AbsOrigin, controller.PlayerPawn.Value.EyeAngles, vel);
+    }
+
+    public static bool HasPermission(this CCSPlayerController? controller, string permission)
+    {
+        return controller.IsValid() && AdminManager.PlayerHasPermissions(controller, permission);
     }
 }

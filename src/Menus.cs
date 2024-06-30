@@ -68,8 +68,6 @@ public partial class AntiRush
             mainMenu.AddItem(new MenuItem(MenuItemType.ChoiceBool, debugOptions, true) { Data = _playerData[controller].DebugOptions.Select(o => o ? 1 : 0).ToArray() });
         }
 
-        // controller.hasPermission()"
-
         if (updateMenu)
             mainMenu.Option = 1;
 
@@ -81,10 +79,10 @@ public partial class AntiRush
             switch (menu.Option)
             {
                 case 0:
-                    if (selectedItem!.Option == 0 && !AdminManager.PlayerHasPermissions(controller, "@css/root"))
+                    if (selectedItem!.Option == 0 && !controller.HasPermission("@css/root"))
                     {
                         controller.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/root"]}");
-                        
+                        return;
                     }
 
                     var customButton = (CustomButton)selectedItem.Values![selectedItem.Option];
