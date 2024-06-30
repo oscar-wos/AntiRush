@@ -14,4 +14,5 @@ public partial class AntiRush
     private string Prefix { get; } = $"[{ChatColors.Lime}AntiRush{ChatColors.White}] ";
     private readonly Dictionary<CCSPlayerController, PlayerData> _playerData = [];
     private readonly List<Zone> _zones = [];
+    private float _roundStart;
 }

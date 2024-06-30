@@ -6,15 +6,21 @@ namespace AntiRush;
 
 public partial class AntiRush
 {
+    private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+    {
+        _roundStart = Server.CurrentTime;
+        return HookResult.Continue;
+    }
+
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
         var controller = @event.Userid;
 
-        if (controller == null || !controller.IsValid)
+        if (!controller.IsValid())
             return HookResult.Continue;
 
-        if (_playerData.TryGetValue(controller, out var value))
-            value.SpawnPos = new Vector(controller.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
+        if (_playerData.TryGetValue(controller!, out var value))
+            value.SpawnPos = new Vector(controller!.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
 
         return HookResult.Continue;
     }
@@ -23,7 +29,7 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (!controller!.IsValid || !_playerData.TryGetValue(controller!, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller!, value.AddZone))
+        if (!controller.IsValid() || !_playerData.TryGetValue(controller!, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller!, value.AddZone))
             return HookResult.Continue;
 
         if (!value.AddZone.Points[0].IsZero() && !value.AddZone.Points[1].IsZero())
@@ -61,10 +67,10 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (controller == null || !controller.IsValid)
+        if (!controller.IsValid())
             return HookResult.Continue;
 
-        _playerData[controller] = new PlayerData();
+        _playerData[controller!] = new PlayerData();
 
         return HookResult.Continue;
     }

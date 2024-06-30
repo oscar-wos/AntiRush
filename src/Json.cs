@@ -22,13 +22,13 @@ public partial class AntiRush
 
         foreach (var zone in jsonZones)
             _zones.Add(new Zone(
+                zone.name,
                 (ZoneType)zone.type,
+                zone.delay,
+                zone.damage,
                 zone.teams.Select(t => (CsTeam)Enum.ToObject(typeof(CsTeam), t)).ToArray(),
                 new Vector(Math.Min(zone.x[0], zone.y[0]), Math.Min(zone.x[1], zone.y[1]), Math.Min(zone.x[2], zone.y[2])),
-                new Vector(Math.Max(zone.x[0], zone.y[0]), Math.Max(zone.x[1], zone.y[1]), Math.Max(zone.x[2], zone.y[2])),
-                zone.name,
-                zone.delay,
-                zone.damage
+                new Vector(Math.Max(zone.x[0], zone.y[0]), Math.Max(zone.x[1], zone.y[1]), Math.Max(zone.x[2], zone.y[2]))
             ));
     }
 
@@ -68,9 +68,9 @@ public class JsonZone
 {
     public required string name { get; set; }
     public required int type { get; set; }
+    public required float delay { get; set; }
+    public required int damage { get; set; }
     public required int[] teams { get; set; }
     public required float[] x { get; set; }
     public required float[] y { get; set; }
-    public required float delay { get; set; }
-    public required int damage { get; set; }
 }

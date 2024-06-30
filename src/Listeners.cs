@@ -6,7 +6,7 @@ public partial class AntiRush
 {
     private void OnTick()
     {
-        foreach (var controller in Utilities.GetPlayers().Where(c => c.IsValid() && _playerData.ContainsKey(c)))
+        foreach (var controller in Utilities.GetPlayers().Where(c => c.IsValid() && c.PawnIsAlive && _playerData.ContainsKey(c)))
         {
             foreach (var zone in _zones)
             {
@@ -15,10 +15,13 @@ public partial class AntiRush
                 if (!zone.Data.TryGetValue(controller, out _))
                     zone.Data[controller] = new ZoneData();
 
-                if (!isInZone && zone.Data[controller].Exit == 0)
+                if (!isInZone)
                 {
                     zone.Data[controller].Entry = 0;
-                    zone.Data[controller].Exit = Server.CurrentTime;
+
+                    if (zone.Data[controller].Exit != 0)
+                        zone.Data[controller].Exit = Server.CurrentTime;
+
                     continue;
                 }
 

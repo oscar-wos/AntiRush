@@ -11,6 +11,7 @@ public partial class AntiRush : BasePlugin
     {
         RegisterListener<Listeners.OnTick>(OnTick);
         RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventBulletImpact>(OnBulletImpact);
         RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
@@ -48,7 +49,7 @@ public partial class AntiRush : BasePlugin
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
 
-        var zone = new Zone(zoneType, teams, minPoint, maxPoint, name, delay, damage);
+        var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
         _zones.Add(zone);
 
         if (name.Length == 0)
@@ -74,36 +75,36 @@ public partial class AntiRush : BasePlugin
         SaveJson(Server.MapName);
     }
 
-    private bool DoAction(CCSPlayerController controller, Zone zone)
+    private void DoAction(CCSPlayerController controller, Zone zone)
     {
         if (zone.Type != ZoneType.Bounce && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
         {
             controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
-            _playerData[controller].LastMessage = Server.CurrentTime;
+            
         }
+
+        _playerData[controller].LastMessage = Server.CurrentTime;
 
         switch (zone.Type)
         {
             case ZoneType.Bounce:
                 controller.Bounce();
-                return true;
+                return;
 
             case ZoneType.Hurt:
                 if (Server.CurrentTime % 1 != 0)
-                    return false;
+                    return;
 
                 controller.Damage(zone.Damage);
-                return false;
+                return;
 
             case ZoneType.Kill:
                 controller.PlayerPawn.Value!.CommitSuicide(true, true);
-                return false;
+                return;
 
             case ZoneType.Teleport:
                 controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
-                return false;
+                return;
         }
-
-        return false;
     }
 }
