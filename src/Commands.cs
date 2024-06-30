@@ -8,27 +8,27 @@ public partial class AntiRush
 {
     public void CommandAntiRush(CCSPlayerController? controller, CommandInfo info)
     {
-        if (controller == null || !controller!.IsValid(true) || !controller.HasPermission("@css/generic")) 
+        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/generic")) 
             return;
 
-        BuildMenu(controller!);
+        BuildMenu(controller);
     }
 
     public void CommandAddZone(CCSPlayerController? controller, CommandInfo info)
     {
-        if (controller == null || !controller!.IsValid(true) || !controller.HasPermission("@css/root"))
+        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/root"))
             return;
 
-        BuildMenu(controller!);
-        BuildMenu(controller!, MenuType.Add);
+        BuildMenu(controller);
+        BuildMenu(controller, MenuType.Add);
     }
 
     public void CommandViewZones(CCSPlayerController? controller, CommandInfo info)
     {
-        if (controller == null || !controller!.IsValid(true) || !controller.HasPermission("@css/generic"))
+        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/generic"))
             return;
 
-        BuildMenu(controller!);
-        BuildMenu(controller!, MenuType.View);
+        BuildMenu(controller);
+        BuildMenu(controller, MenuType.View);
     }
 }

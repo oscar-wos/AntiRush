@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using AntiRush.Enums;
@@ -25,19 +24,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
         //AddCommand("css_viewzones", "View Zones", CommandViewZones);
-
-        AddCommand("css_test", "test", (controller, info) =>
-        {
-            var beamEntity = Utilities.CreateEntityByName<CBeam>("beam");
-            beamEntity.Width = 1.5f;
-            beamEntity.LifeState = 2;
-            beamEntity.FireTime = 0.5f;
-
-            beamEntity.Render = Color.Red;
-            beamEntity.Teleport(new Vector(-1700, -1770, -180), QAngle.Zero, Vector.Zero);
-            beamEntity.EndPos.Add(new Vector(-1700, -1300, -150));
-            beamEntity.DispatchSpawn();
-        });
 
         if (!isReload)
             return;

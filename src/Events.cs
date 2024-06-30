@@ -16,11 +16,11 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (controller == null || !controller.IsValid())
+        if (controller == null || !controller.IsValid() || controller.PlayerPawn.Value == null || controller.PlayerPawn.Value.AbsOrigin == null)
             return HookResult.Continue;
 
         if (_playerData.TryGetValue(controller, out var value))
-            value.SpawnPos = new Vector(controller.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
+            value.SpawnPos = new Vector(controller.PlayerPawn.Value.AbsOrigin.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
 
         return HookResult.Continue;
     }
