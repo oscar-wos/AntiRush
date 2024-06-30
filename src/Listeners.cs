@@ -19,7 +19,7 @@ public partial class AntiRush
                 {
                     zone.Data[controller].Entry = 0;
 
-                    if (zone.Data[controller].Exit != 0)
+                    if (zone.Data[controller].Exit == 0)
                         zone.Data[controller].Exit = Server.CurrentTime;
 
                     continue;

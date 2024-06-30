@@ -65,9 +65,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
 
-        if (name.Length == 0)
-            name = "noname";
-
         var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
         _zones.Add(zone);
 
