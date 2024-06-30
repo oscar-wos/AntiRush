@@ -10,6 +10,7 @@ public partial class AntiRush
     public override string ModuleName => "AntiRush";
     public override string ModuleVersion => "1.0.1";
     public override string ModuleAuthor => "https://github.com/oscar-wos/AntiRush";
+    public AntiRushConfig Config { get; set; } = new();
     public Menu.Menu Menu { get; } = new();
     private string Prefix { get; } = $"[{ChatColors.Lime}AntiRush{ChatColors.White}] ";
     private readonly Dictionary<CCSPlayerController, PlayerData> _playerData = [];
