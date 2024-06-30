@@ -20,21 +20,11 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventBulletImpact>(OnBulletImpact);
-        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
 
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
         //AddCommand("css_viewzones", "View Zones", CommandViewZones);
-
-        AddCommand("css_test", "test", (controller, info) =>
-        {
-            var beamEntity = Utilities.CreateEntityByName<CBeam>("beam");
-            beamEntity.Width = 1.5f;
-            beamEntity.Render = Color.Red;
-            beamEntity.Teleport(new Vector(-1700, -1770, -180), QAngle.Zero, Vector.Zero);
-            beamEntity.EndPos.Add(new Vector(-1700, -1300, -150));
-            beamEntity.DispatchSpawn();
-        });
 
         if (!isReload)
             return;
@@ -90,6 +80,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
     private void DoAction(CCSPlayerController controller, Zone zone)
     {
+        if (!_playerData.TryGetValue(controller, out _))
+            _playerData[controller] = new PlayerData();
+
         if (Server.CurrentTime - _playerData[controller].LastMessage >= 1)
         {
             if ((zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 == 0) || zone.Type != ZoneType.Hurt)
@@ -106,10 +99,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return;
 
             case ZoneType.Hurt:
-                if (Server.CurrentTime % 1 != 0)
-                    return;
+                if (Server.CurrentTime % 1 == 0)
+                    controller.Damage(zone.Damage);
 
-                controller.Damage(zone.Damage);
                 return;
 
             case ZoneType.Kill:
@@ -117,7 +109,11 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return;
 
             case ZoneType.Teleport:
-                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
+                if (!_playerData[controller].SpawnPos.IsZero())
+                    controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
+                else
+                    controller.PlayerPawn.Value!.CommitSuicide(true, true);
+
                 return;
         }
     }
