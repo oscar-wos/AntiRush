@@ -16,11 +16,11 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (!controller.IsValid())
+        if (controller == null || !controller.IsValid())
             return HookResult.Continue;
 
-        if (_playerData.TryGetValue(controller!, out var value))
-            value.SpawnPos = new Vector(controller!.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
+        if (_playerData.TryGetValue(controller, out var value))
+            value.SpawnPos = new Vector(controller.PlayerPawn.Value!.AbsOrigin!.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
 
         return HookResult.Continue;
     }
@@ -29,7 +29,7 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (!controller.IsValid() || !_playerData.TryGetValue(controller!, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller!, value.AddZone))
+        if (controller == null || controller.IsValid() || !_playerData.TryGetValue(controller, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller, value.AddZone))
             return HookResult.Continue;
 
         if (!value.AddZone.Points[0].IsZero() && !value.AddZone.Points[1].IsZero())
@@ -57,8 +57,8 @@ public partial class AntiRush
             }
         }
 
-        Menu.PopMenu(controller!, value.AddZone);
-        BuildAddZoneMenu(controller!);
+        Menu.PopMenu(controller, value.AddZone);
+        BuildAddZoneMenu(controller);
 
         return HookResult.Continue;
     }
@@ -67,10 +67,10 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (!controller.IsValid())
+        if (controller == null || !controller.IsValid())
             return HookResult.Continue;
 
-        _playerData[controller!] = new PlayerData();
+        _playerData[controller] = new PlayerData();
 
         return HookResult.Continue;
     }

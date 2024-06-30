@@ -16,7 +16,7 @@ public static class ControllerExtends
 
     public static void Damage(this CCSPlayerController? controller, int damage)
     {
-        if (!controller.IsValid() || controller!.PlayerPawn.Value == null)
+        if (controller == null || !controller.IsValid() || controller!.PlayerPawn.Value == null)
             return;
 
         controller.PlayerPawn.Value.Health -= damage;
@@ -28,7 +28,7 @@ public static class ControllerExtends
 
     public static void Bounce(this CCSPlayerController? controller)
     {
-        if (!controller.IsValid() || controller!.PlayerPawn.Value == null)
+        if (controller == null || !controller.IsValid() || controller!.PlayerPawn.Value == null)
             return;
 
         var vel = controller.PlayerPawn.Value.AbsVelocity;
@@ -41,6 +41,6 @@ public static class ControllerExtends
 
     public static bool HasPermission(this CCSPlayerController? controller, string permission)
     {
-        return controller.IsValid() && AdminManager.PlayerHasPermissions(controller, permission);
+        return controller != null && controller.IsValid() && AdminManager.PlayerHasPermissions(controller, permission);
     }
 }

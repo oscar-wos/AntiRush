@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Localization;
 using AntiRush.Enums;
@@ -31,5 +32,11 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
             ZoneType.Teleport => $"{ChatColors.Magenta}{localize["zone.Teleport"]}{ChatColors.White}",
             _ => ""
         };
+    }
+
+    public void Draw()
+    {
+        if (MinPoint.IsZero() || MaxPoint.IsZero())
+            return;
     }
 }
