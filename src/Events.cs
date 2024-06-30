@@ -29,7 +29,7 @@ public partial class AntiRush
     {
         var controller = @event.Userid;
 
-        if (controller == null || controller.IsValid() || !_playerData.TryGetValue(controller, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller, value.AddZone))
+        if (controller == null || !controller.IsValid() || !_playerData.TryGetValue(controller, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller, value.AddZone))
             return HookResult.Continue;
 
         if (!value.AddZone.Points[0].IsZero() && !value.AddZone.Points[1].IsZero())
