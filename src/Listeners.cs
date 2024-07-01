@@ -1,5 +1,5 @@
-﻿using AntiRush.Enums;
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
+using AntiRush.Enums;
 
 namespace AntiRush;
 
@@ -7,6 +7,19 @@ public partial class AntiRush
 {
     private void OnTick()
     {
+        var announceNoRush = false;
+        var announceNoCamp = false;
+
+        if (Config.NoRushTime != 0 && Math.Abs(Config.NoRushTime + _roundStart - Server.CurrentTime).ToString("0.00") is "0.00" or "0.01")
+            announceNoRush = true;
+
+        if (Config.NoCampTime != 0 && Math.Abs(Config.NoCampTime + _roundStart - Server.CurrentTime).ToString("0.00") is "0.00" or "0.01")
+            announceNoCamp = true;
+
+        if (announceNoRush || announceNoCamp)
+        {
+        }
+
         foreach (var controller in Utilities.GetPlayers().Where(c => c.IsValid() && c.PawnIsAlive))
         {
             foreach (var zone in _zones)

@@ -14,7 +14,7 @@ public partial class AntiRush
         if (!controller.IsValid())
             return;
 
-        if (_playerData[controller].AddZone != null)
+        if (_playerData.TryGetValue(controller, out var value) && value.AddZone != null)
         {
             for (var i = 0; i < 2; i++)
                 _playerData[controller].AddZone!.Points[i] = Vector.Zero;
@@ -104,6 +104,9 @@ public partial class AntiRush
     private void BuildAddZoneMenu(CCSPlayerController controller)
     {
         var addZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.Add"]) { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" } };
+
+        if (!_playerData.ContainsKey(controller))
+            _playerData[controller] = new PlayerData();
 
         if (_playerData[controller].AddZone == null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "1"])));

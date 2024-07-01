@@ -19,7 +19,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventBulletImpact>(OnBulletImpact);
-        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
 
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);

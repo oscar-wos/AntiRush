@@ -63,7 +63,7 @@ public partial class AntiRush
         return HookResult.Continue;
     }
 
-    private HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+    private HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var controller = @event.Userid;
 
