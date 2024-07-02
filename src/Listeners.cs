@@ -24,10 +24,10 @@ public partial class AntiRush
         {
             foreach (var zone in _zones)
             {
-                if (Config.NoRushTime + _roundStart < Server.CurrentTime && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if (Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                     continue;
 
-                if (Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)
+                if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)
                     continue;
 
                 var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);

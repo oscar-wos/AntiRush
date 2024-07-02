@@ -20,7 +20,7 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
     public CBeam[] Beams { get; } = [];
 
     public bool IsInZone(Vector point)
-    { 
+    {
         return point.X >= MinPoint.X && point.X <= MaxPoint.X && point.Y >= MinPoint.Y && point.Y <= MaxPoint.Y && point.Z + 36 >= MinPoint.Z && point.Z + 36 <= MaxPoint.Z;
     }
 
