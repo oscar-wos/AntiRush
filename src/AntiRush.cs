@@ -25,8 +25,11 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
         //AddCommand("css_viewzones", "View Zones", CommandViewZones);
 
-        foreach (var controller in Utilities.GetPlayers())
-            _playerData[controller] = new PlayerData();
+        Server.NextFrame(() =>
+        {
+            foreach (var controller in Utilities.GetPlayers())
+                _playerData[controller] = new PlayerData();
+        });
 
         LoadJson(Server.MapName);
         Server.ExecuteCommand("mp_restartgame 1");
