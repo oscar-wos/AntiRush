@@ -25,9 +25,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
         //AddCommand("css_viewzones", "View Zones", CommandViewZones);
 
-        if (!isReload)
-            return;
-
         foreach (var controller in Utilities.GetPlayers())
             _playerData[controller] = new PlayerData();
 
@@ -57,6 +54,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
         _zones.Add(zone);
 
+        if (Config.DrawZones)
+            zone.Draw();
+
         var printMessage = $"{Prefix}{Localizer["saving", zone.ToString(Localizer), name]} | {Localizer["menu.Teams"]} [";
 
         if (teams.Contains(CsTeam.Terrorist))
@@ -79,9 +79,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
     private void DoAction(CCSPlayerController controller, Zone zone)
     {
-        if (!_playerData.TryGetValue(controller, out _))
-            _playerData[controller] = new PlayerData();
-
         if (Server.CurrentTime - _playerData[controller].LastMessage >= 1)
         {
             if ((zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 == 0) || zone.Type != ZoneType.Hurt)

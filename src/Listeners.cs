@@ -10,10 +10,10 @@ public partial class AntiRush
         var announceNoRush = false;
         var announceNoCamp = false;
 
-        if (Config.NoRushTime != 0 && Math.Abs(Config.NoRushTime + _roundStart - Server.CurrentTime).ToString("0.00") is "0.00" or "0.01")
+        if (Config.NoRushTime != 0 && Math.Abs(Config.NoRushTime + _roundStart - Server.CurrentTime).ToString("0.00") == "0.00")
             announceNoRush = true;
 
-        if (Config.NoCampTime != 0 && Math.Abs(Config.NoCampTime + _roundStart - Server.CurrentTime).ToString("0.00") is "0.00" or "0.01")
+        if (Config.NoCampTime != 0 && Math.Abs(Config.NoCampTime + _roundStart - Server.CurrentTime).ToString("0.00") == "0.00")
             announceNoCamp = true;
 
         if (announceNoRush || announceNoCamp)

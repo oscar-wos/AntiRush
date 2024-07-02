@@ -9,6 +9,13 @@ public partial class AntiRush
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
         _roundStart = Server.CurrentTime;
+
+        if (!Config.DrawZones)
+            return HookResult.Continue;
+
+        foreach (var zone in _zones)
+            zone.Draw();
+
         return HookResult.Continue;
     }
 

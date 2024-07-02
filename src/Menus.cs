@@ -17,9 +17,9 @@ public partial class AntiRush
         if (_playerData.TryGetValue(controller, out var value) && value.AddZone != null)
         {
             for (var i = 0; i < 2; i++)
-                _playerData[controller].AddZone!.Points[i] = Vector.Zero;
+                value.AddZone.Points[i] = Vector.Zero;
 
-            _playerData[controller].AddZone!.LastShot = 0;
+            value.AddZone.LastShot = 0;
             _playerData[controller].AddZone = null;
         }
 
@@ -105,9 +105,6 @@ public partial class AntiRush
     {
         var addZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.Add"]) { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" } };
 
-        if (!_playerData.ContainsKey(controller))
-            _playerData[controller] = new PlayerData();
-
         if (_playerData[controller].AddZone == null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "1"])));
         else if (_playerData[controller].AddZone!.Points[1].IsZero())
@@ -175,7 +172,6 @@ public partial class AntiRush
                     {
                         controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
                         selectedItem.DataString = "0.0";
-                        menu.AcceptInput = true;
                     }
                     else
                         selectedItem.DataString = delay.ToString("0.0");
@@ -185,7 +181,6 @@ public partial class AntiRush
                 {
                     controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "int"]}");
                     selectedItem.DataString = "10";
-                    menu.AcceptInput = true;
                 }
             }
 
