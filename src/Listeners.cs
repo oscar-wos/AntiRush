@@ -7,17 +7,31 @@ public partial class AntiRush
 {
     private void OnTick()
     {
-        if (Config.NoRushTime != 0 && Math.Abs(Config.NoRushTime + _roundStart - Server.CurrentTime) == 0)
-            Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
+        if (Config.NoRushTime != 0 && !_bombPlanted)
+        {
+            var diff = (Config.NoRushTime + _roundStart) - Server.CurrentTime;
 
-        if (Config.NoCampTime != 0 && Math.Abs(Config.NoCampTime + _roundStart - Server.CurrentTime) == 0)
-            Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}");
+            if (diff > 0 && Print(diff))
+                Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabledSeconds", diff.ToString("0")]}");
+            else if (diff == 0)
+                Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
+        }
+
+        if (Config.NoCampTime != 0)
+        {
+            var diff = (Config.NoCampTime + _roundStart) - Server.CurrentTime;
+
+            if (diff > 0 && Print(diff))
+                Server.PrintToChatAll($"{Prefix}{Localizer["campEnabledSeconds", diff.ToString("0")]}");
+            else if (diff == 0)
+                Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}");
+        }
 
         foreach (var controller in Utilities.GetPlayers().Where(c => c.IsValid() && c.PawnIsAlive))
         {
             foreach (var zone in _zones)
             {
-                if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if ((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                     continue;
 
                 if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)
@@ -68,6 +82,10 @@ public partial class AntiRush
                 DoAction(controller, zone);
             }
         }
+
+        return;
+
+        static bool Print(float diff) => new float[] { 1, 2, 3, 5, 10, 15, 30, 60 }.Contains(diff);
     }
 
     private void OnMapStart(string mapName)

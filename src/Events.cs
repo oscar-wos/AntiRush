@@ -23,6 +23,7 @@ public partial class AntiRush
     private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
     {
         _bombPlanted = true;
+        Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
 
         return HookResult.Continue;
     }
