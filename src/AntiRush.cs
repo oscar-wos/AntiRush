@@ -82,35 +82,41 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
             zone.Draw();
     }
 
+    private bool PrintAction(CCSPlayerController controller, Zone zone)
+    {
+        if (!controller.IsValid(true) || !(Server.CurrentTime - _playerData[controller].LastMessage >= 1))
+            return false;
+
+        if (zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 != 0)
+            return false;
+
+        switch (Config.Messages)
+        {
+            case "simple":
+                controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
+                return true;
+
+            case "detailed":
+                if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                {
+                    controller.PrintToChat(Config.NoRushTime != 0
+                        ? $"{Prefix}{zone.ToString(Localizer)}{Localizer["rushDelayRemaining", (_roundStart + Config.NoRushTime - Server.CurrentTime).ToString("0")]}"
+                        : $"{Prefix}{zone.ToString(Localizer)}");
+
+                    return true;
+                }
+                
+                controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
+                return true;
+        }
+
+        return false;
+    }
+
     private void DoAction(CCSPlayerController controller, Zone zone)
     {
-        var currentTime = Server.CurrentTime;
-
-        if (controller.IsValid(true) && currentTime - _playerData[controller].LastMessage >= 1)
-        {
-            switch (Config.Messages)
-            {
-                case "simple":
-                    if ((zone.Type == ZoneType.Hurt && currentTime % 1 == 0) || zone.Type != ZoneType.Hurt)
-                        controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
-
-                    break;
-
-                case "detailed":
-                    if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
-                    {
-                        controller.PrintToChat(Config.NoRushTime != 0
-                            ? $"{Prefix}{zone.ToString(Localizer)}{Localizer["rushDelayRemaining", (_roundStart + Config.NoRushTime - currentTime).ToString("0")]}"
-                            : $"{Prefix}{zone.ToString(Localizer)}");
-                    }
-                    else if ((zone.Type == ZoneType.Hurt && currentTime % 1 == 0) || zone.Type != ZoneType.Hurt)
-                        controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
-
-                    break;
-            }
-
-            _playerData[controller].LastMessage = currentTime;
-        }
+        if (PrintAction(controller, zone))
+            _playerData[controller].LastMessage = Server.CurrentTime;
 
         switch (zone.Type)
         {
@@ -119,7 +125,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return;
 
             case ZoneType.Hurt:
-                if (currentTime % 1 == 0)
+                if (Server.CurrentTime % 1 == 0)
                     controller.Damage(zone.Damage);
 
                 return;
