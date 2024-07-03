@@ -105,6 +105,12 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
                     return true;
                 }
+
+                if (zone.Type == ZoneType.Hurt)
+                {
+                    controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}{Localizer["hurtDamage", zone.Damage]}");
+                    return true;
+                }
                 
                 controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
                 return true;

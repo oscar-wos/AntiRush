@@ -9,6 +9,7 @@
   "campEnabled": "Camp Zones {olive}enabled{white}",
   "delayRemaining": " in {green}{0}{white} second(s)",
   "rushDelayRemaining": " {red}disabled{white} in {green}{0}{white} second(s)",
+  "hurtDamage": " for {green}{0}{white} damage",
   "zone.Bounce": "Bounce",
   "zone.Hurt": "Hurt",
   "zone.Kill": "Kill",
