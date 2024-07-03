@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
+﻿using CounterStrikeSharp.API.Modules.Utils;
+using System.Text.Json;
 using AntiRush.Enums;
-using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
 
@@ -22,19 +22,19 @@ public partial class AntiRush
 
         foreach (var zone in jsonZones)
             _zones.Add(new Zone(
+                zone.name,
                 (ZoneType)zone.type,
+                zone.delay,
+                zone.damage,
                 zone.teams.Select(t => (CsTeam)Enum.ToObject(typeof(CsTeam), t)).ToArray(),
                 new Vector(Math.Min(zone.x[0], zone.y[0]), Math.Min(zone.x[1], zone.y[1]), Math.Min(zone.x[2], zone.y[2])),
-                new Vector(Math.Max(zone.x[0], zone.y[0]), Math.Max(zone.x[1], zone.y[1]), Math.Max(zone.x[2], zone.y[2])),
-                zone.name,
-                zone.delay,
-                zone.damage
+                new Vector(Math.Max(zone.x[0], zone.y[0]), Math.Max(zone.x[1], zone.y[1]), Math.Max(zone.x[2], zone.y[2]))
             ));
     }
 
     public void SaveJson(string mapName)
     {
-        var path = $"../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/";
+        var path = "../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/";
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
@@ -46,27 +46,20 @@ public partial class AntiRush
 
         List<JsonZone> jsonZones = [];
 
-        foreach (var zone in _zones)
-        {
-            var teams = zone.Teams.Select(team => (int)team).ToArray();
-            var minPoint = new[] { zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z };
-            var maxPoint = new[] { zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z };
-
-            var jsonObject = new JsonZone()
+        jsonZones.AddRange(from zone in _zones
+            select new JsonZone()
             {
                 name = zone.Name,
                 type = (int)zone.Type,
-                teams = teams,
-                x = minPoint,
-                y = maxPoint,
                 delay = zone.Delay,
-                damage = zone.Damage
-            };
+                damage = zone.Damage,
+                teams = zone.Teams.Select(team => (int)team).ToArray(),
+                x = [zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z],
+                y = [zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z]
+            }
+        );
 
-            jsonZones.Add(jsonObject);
-        }
-
-        var json = JsonSerializer.Serialize(jsonZones);
+        var json = JsonSerializer.Serialize(jsonZones, new JsonSerializerOptions() { WriteIndented = true });
         File.WriteAllText(path, json);
     }
 }
@@ -75,9 +68,9 @@ public class JsonZone
 {
     public required string name { get; set; }
     public required int type { get; set; }
+    public required float delay { get; set; }
+    public required int damage { get; set; }
     public required int[] teams { get; set; }
     public required float[] x { get; set; }
     public required float[] y { get; set; }
-    public required float delay { get; set; }
-    public required int damage { get; set; }
 }

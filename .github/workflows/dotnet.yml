@@ -47,8 +47,8 @@ jobs:
 
             - name: Create Directories
               run: |
-                mkdir -p ./plugin/plugins/${{ github.event.repository.name }}
-                mkdir -p ./plugin/shared/Menu
+                mkdir -p plugin/plugins/${{ github.event.repository.name }}
+                mkdir -p plugin/shared/Menu
 
             - name: Move Files
               run: |
@@ -61,25 +61,27 @@ jobs:
 
             - name: Zip
               run: |
-                cd ./plugin/
+                cd ./plugin
                 zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
 
-            - name: Extract version and create tag
+            - name: Extract version
               id: extract_version
               run: |
                 version=$(grep -oP 'public override string ModuleVersion => "\K(.*)(?=";)' ./src/Globals.cs)
-                echo "Version found: $version"
-                git config --global user.email "actions@github.com"
-                git config --global user.name "GitHub Actions"
-                git tag $version
-                git push origin $version
                 echo "::set-output name=version::$version"
 
             - name: Publish
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ github.event.repository.name }}-${{ github.sha }}
-                path: plugin
+                path: ./plugin
+
+            - name: Create Tag
+              run: |
+                git config --global user.email "actions@github.com"
+                git config --global user.name "GitHub Actions"
+                git tag ${{ env.version }}
+                git push origin ${{ env.version }}
 
             - name: Create Release
               id: create_release
