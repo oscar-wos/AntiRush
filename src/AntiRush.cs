@@ -84,7 +84,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
     private void DoAction(CCSPlayerController controller, Zone zone)
     {
-        if (Server.CurrentTime - _playerData[controller].LastMessage >= 1)
+        if (controller.IsValid(true) && Server.CurrentTime - _playerData[controller].LastMessage >= 1)
         {
             if ((zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 == 0) || zone.Type != ZoneType.Hurt)
             {
