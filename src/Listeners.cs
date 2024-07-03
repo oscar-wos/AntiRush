@@ -20,7 +20,7 @@ public partial class AntiRush
         if (Config.NoCampTime != 0)
         {
             var diff = (Config.NoCampTime + _roundStart) - Server.CurrentTime;
-
+            
             if (diff > 0 && Print(diff))
                 Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}{Localizer["delayRemaining", diff.ToString("0")]}");
             else if (diff == 0)

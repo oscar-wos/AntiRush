@@ -110,11 +110,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return;
 
             case ZoneType.Teleport:
-                if (!_playerData[controller].SpawnPos.IsZero())
-                    controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
-                else
-                    controller.PlayerPawn.Value!.CommitSuicide(true, true);
-
+                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
                 return;
         }
     }
