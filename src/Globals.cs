@@ -16,4 +16,5 @@ public partial class AntiRush
     private readonly Dictionary<CCSPlayerController, PlayerData> _playerData = [];
     private readonly List<Zone> _zones = [];
     private float _roundStart;
+    private bool _bombPlanted;
 }

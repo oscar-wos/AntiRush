@@ -7,24 +7,17 @@ public partial class AntiRush
 {
     private void OnTick()
     {
-        var announceNoRush = false;
-        var announceNoCamp = false;
-
         if (Config.NoRushTime != 0 && Math.Abs(Config.NoRushTime + _roundStart - Server.CurrentTime) == 0)
-            announceNoRush = true;
+            Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
 
         if (Config.NoCampTime != 0 && Math.Abs(Config.NoCampTime + _roundStart - Server.CurrentTime) == 0)
-            announceNoCamp = true;
-
-        if (announceNoRush || announceNoCamp)
-        {
-        }
+            Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}");
 
         foreach (var controller in Utilities.GetPlayers().Where(c => c.IsValid() && c.PawnIsAlive))
         {
             foreach (var zone in _zones)
             {
-                if (Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                     continue;
 
                 if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)

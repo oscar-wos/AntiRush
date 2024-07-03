@@ -17,6 +17,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         RegisterListener<Listeners.OnTick>(OnTick);
         RegisterListener<Listeners.OnMapStart>(OnMapStart);
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
+        RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventBulletImpact>(OnBulletImpact);
         RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
@@ -25,14 +26,15 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
         //AddCommand("css_viewzones", "View Zones", CommandViewZones);
 
+        LoadJson(Server.MapName);
+
         Server.NextFrame(() =>
         {
             foreach (var controller in Utilities.GetPlayers())
                 _playerData[controller] = new PlayerData();
-        });
 
-        LoadJson(Server.MapName);
-        Server.ExecuteCommand("mp_restartgame 1");
+            Server.ExecuteCommand("mp_restartgame 1");
+        });
     }
 
     private void SaveZone(CCSPlayerController controller)
@@ -57,9 +59,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         var zone = new Zone(name, zoneType, delay, damage, teams, minPoint, maxPoint);
         _zones.Add(zone);
 
-        if (Config.DrawZones)
-            zone.Draw();
-
         var printMessage = $"{Prefix}{Localizer["saving", zone.ToString(Localizer), name]} | {Localizer["menu.Teams"]} [";
 
         if (teams.Contains(CsTeam.Terrorist))
@@ -78,6 +77,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
         controller.PrintToChat(printMessage);
         SaveJson(Server.MapName);
+
+        if (Config.DrawZones)
+            zone.Draw();
     }
 
     private void DoAction(CCSPlayerController controller, Zone zone)

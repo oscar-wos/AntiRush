@@ -9,12 +9,20 @@ public partial class AntiRush
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
         _roundStart = Server.CurrentTime;
+        _bombPlanted = false;
 
         if (!Config.DrawZones)
             return HookResult.Continue;
 
         foreach (var zone in _zones)
             zone.Draw();
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
+    {
+        _bombPlanted = true;
 
         return HookResult.Continue;
     }
@@ -53,14 +61,22 @@ public partial class AntiRush
         {
             value.AddZone.Points[1] = new Vector(@event.X, @event.Y, @event.Z);
 
-            var diff = Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z);
+            var diffX = Math.Abs(value.AddZone.Points[0].X - value.AddZone.Points[1].X);
+            var diffY = Math.Abs(value.AddZone.Points[0].Y - value.AddZone.Points[1].Y);
+            var diffZ = Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z);
 
-            if (diff < 200)
+            if (diffX < 10)
+                value.AddZone.Points[0].X += 10 - diffX;
+
+            if (diffY < 10)
+                value.AddZone.Points[0].Y += 10 - diffY;
+
+            if (diffZ < 200)
             {
                 if (value.AddZone.Points[0].Z >= value.AddZone.Points[1].Z)
-                    value.AddZone.Points[0].Z += 200 - diff;
+                    value.AddZone.Points[0].Z += 200 - diffZ;
                 else
-                    value.AddZone.Points[1].Z += 200 - diff;
+                    value.AddZone.Points[1].Z += 200 - diffZ;
             }
         }
 
