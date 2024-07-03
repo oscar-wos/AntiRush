@@ -31,7 +31,7 @@ public partial class AntiRush
         {
             foreach (var zone in _zones)
             {
-                if ((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                     continue;
 
                 if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)
