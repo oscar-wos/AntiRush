@@ -7,6 +7,9 @@ public partial class AntiRush
 {
     private void OnTick()
     {
+        if (_warmup && !Config.Warmup)
+            return;
+
         if (Config.NoRushTime != 0 && !_bombPlanted)
         {
             var diff = (Config.NoRushTime + _roundStart) - Server.CurrentTime;
@@ -20,7 +23,7 @@ public partial class AntiRush
         if (Config.NoCampTime != 0)
         {
             var diff = (Config.NoCampTime + _roundStart) - Server.CurrentTime;
-            
+
             if (diff > 0 && Print(diff))
                 Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}{Localizer["delayRemaining", diff.ToString("0")]}");
             else if (diff == 0)
@@ -91,5 +94,15 @@ public partial class AntiRush
     private void OnMapStart(string mapName)
     {
         LoadJson(mapName);
+    }
+
+    private void OnClientPutInServer(int playerSlot)
+    {
+        var controller = Utilities.GetPlayerFromSlot(playerSlot);
+
+        if (controller == null || !controller.IsValid())
+            return;
+
+        _playerData[controller] = new PlayerData();
     }
 }

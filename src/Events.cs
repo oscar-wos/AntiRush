@@ -11,6 +11,9 @@ public partial class AntiRush
         _roundStart = Server.CurrentTime;
         _bombPlanted = false;
 
+        var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+        _warmup = gameRules.WarmupPeriod;
+
         if (!Config.DrawZones)
             return HookResult.Continue;
 
@@ -83,18 +86,6 @@ public partial class AntiRush
 
         Menu.PopMenu(controller, value.AddZone);
         BuildAddZoneMenu(controller);
-
-        return HookResult.Continue;
-    }
-
-    private HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
-    {
-        var controller = @event.Userid;
-
-        if (controller == null || !controller.IsValid())
-            return HookResult.Continue;
-
-        _playerData[controller] = new PlayerData();
 
         return HookResult.Continue;
     }
