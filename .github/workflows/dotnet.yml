@@ -52,16 +52,16 @@ jobs:
 
             - name: Move Files
               run: |
-                mv ./src/bin/Release/net8.0/* plugin/plugins/${{ github.event.repository.name }}
-                mv ./Menu/src/bin/Release/net8.0/* plugin/shared/Menu
+                mv ./src/bin/Release/net8.0/* ./plugin/plugins/${{ github.event.repository.name }}
+                mv ./Menu/src/bin/Release/net8.0/* ./plugin/shared/Menu
 
             - name: Remove .API
               run: |
-                rm plugin/plugins/${{ github.event.repository.name }}/Menu.*
+                rm ./plugin/plugins/${{ github.event.repository.name }}/Menu.*
 
             - name: Zip
               run: |
-                cd plugin/
+                cd ./plugin
                 zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
 
             - name: Extract version
@@ -74,7 +74,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ github.event.repository.name }}-${{ github.sha }}
-                path: plugin
+                path: ./plugin
 
             - name: Create Tag
               run: |
