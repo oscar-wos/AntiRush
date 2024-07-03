@@ -100,7 +100,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                 {
                     controller.PrintToChat(Config.NoRushTime != 0
-                        ? $"{Prefix}{zone.ToString(Localizer)}{Localizer["rushDelayRemaining", (_roundStart + Config.NoRushTime - Server.CurrentTime).ToString("0")]}"
+                        ? $"{Prefix}{Localizer["rushDelayRemaining", zone.ToString(Localizer), (_roundStart + Config.NoRushTime - Server.CurrentTime).ToString("0")]}"
                         : $"{Prefix}{zone.ToString(Localizer)}");
 
                     return true;
@@ -108,7 +108,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
                 if (zone.Type == ZoneType.Hurt)
                 {
-                    controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}{Localizer["hurtDamage", zone.Damage]}");
+                    controller.PrintToChat($"{Prefix}{Localizer["hurtDamage", zone.ToString(Localizer), zone.Damage]}");
                     return true;
                 }
                 

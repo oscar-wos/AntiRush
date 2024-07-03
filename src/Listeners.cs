@@ -15,7 +15,7 @@ public partial class AntiRush
             var diff = (Config.NoRushTime + _roundStart) - Server.CurrentTime;
 
             if (diff > 0 && Print(diff))
-                Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}{Localizer["delayRemaining", diff.ToString("0")]}");
+                Server.PrintToChatAll($"{Prefix}{Localizer["delayRemaining", Localizer["rushDisabled"], diff.ToString("0")]}");
             else if (diff == 0)
                 Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
         }
@@ -25,7 +25,7 @@ public partial class AntiRush
             var diff = (Config.NoCampTime + _roundStart) - Server.CurrentTime;
 
             if (diff > 0 && Print(diff))
-                Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}{Localizer["delayRemaining", diff.ToString("0")]}");
+                Server.PrintToChatAll($"{Prefix}{Localizer["delayRemaining", Localizer["campEnabled"], diff.ToString("0")]}");
             else if (diff == 0)
                 Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}");
         }
@@ -74,7 +74,7 @@ public partial class AntiRush
                         var diffString = diff % 1;
 
                         if (diffString.ToString("0.00") is ("0.00" or "0.01") && diff >= 1)
-                            controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}{Localizer["delayRemaining", diff.ToString("0")]}");
+                            controller.PrintToChat($"{Prefix}{Localizer["delayRemaining", zone.ToString(Localizer), diff.ToString("0")]}");
                     }
                     else
                         DoAction(controller, zone);
