@@ -1,4 +1,5 @@
 https://www.youtube.com/watch?v=AkaBeFJcTv8
+
 `addons/counterstrikesharp/configs/plugins/AntiRush/AntiRush.json`
 ```json
 {
