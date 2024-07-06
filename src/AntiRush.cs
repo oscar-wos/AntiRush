@@ -33,7 +33,8 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
             foreach (var controller in Utilities.GetPlayers())
                 _playerData[controller] = new PlayerData();
 
-            Server.ExecuteCommand("mp_restartgame 1");
+            if (Config.RestartOnLoad)
+                Server.ExecuteCommand("mp_restartgame 1");
         });
     }
 
