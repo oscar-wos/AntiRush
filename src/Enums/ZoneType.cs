@@ -2,8 +2,8 @@
 
 public enum ZoneType
 {
-    Bounce,
-    Hurt,
-    Kill,
-    Teleport
+    Bounce = 0,
+    Hurt = 1,
+    Kill = 2,
+    Teleport = 3
 }

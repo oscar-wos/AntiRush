@@ -8,7 +8,7 @@ namespace AntiRush;
 public partial class AntiRush
 {
     public override string ModuleName => "AntiRush";
-    public override string ModuleVersion => "1.0.3";
+    public override string ModuleVersion => "1.0.4";
     public override string ModuleAuthor => "https://github.com/oscar-wos/AntiRush";
     public AntiRushConfig Config { get; set; } = new();
     public Menu.Menu Menu { get; } = new();
@@ -19,4 +19,5 @@ public partial class AntiRush
     private float _roundStart;
     private bool _bombPlanted;
     private bool _warmup;
+    private float[] _countdown = [];
 }

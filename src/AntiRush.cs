@@ -10,6 +10,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
     public void OnConfigParsed(AntiRushConfig config)
     {
         Config = config;
+        _countdown = Config.Countdown.Select(c => (float)c).ToArray();
     }
 
     public override void Load(bool isReload)

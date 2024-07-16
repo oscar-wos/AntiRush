@@ -14,7 +14,7 @@ public partial class AntiRush
         {
             var diff = (Config.NoRushTime + _roundStart) - Server.CurrentTime;
 
-            if (diff > 0 && Print(diff))
+            if (diff > 0 && _countdown.Contains(diff))
                 Server.PrintToChatAll($"{Prefix}{Localizer["delayRemaining", Localizer["rushDisabled"], diff.ToString("0")]}");
             else if (diff == 0)
                 Server.PrintToChatAll($"{Prefix}{Localizer["rushDisabled"]}");
@@ -24,7 +24,7 @@ public partial class AntiRush
         {
             var diff = (Config.NoCampTime + _roundStart) - Server.CurrentTime;
 
-            if (diff > 0 && Print(diff))
+            if (diff > 0 && _countdown.Contains(diff))
                 Server.PrintToChatAll($"{Prefix}{Localizer["delayRemaining", Localizer["campEnabled"], diff.ToString("0")]}");
             else if (diff == 0)
                 Server.PrintToChatAll($"{Prefix}{Localizer["campEnabled"]}");
@@ -34,10 +34,10 @@ public partial class AntiRush
         {
             foreach (var zone in _zones)
             {
-                if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && Config.RushZones.Contains((int)zone.Type))
                     continue;
 
-                if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && zone.Type is ZoneType.Hurt)
+                if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && Config.CampZones.Contains((int)zone.Type))
                     continue;
 
                 var isInZone = zone.IsInZone(controller.PlayerPawn.Value!.AbsOrigin!);
@@ -87,8 +87,6 @@ public partial class AntiRush
         }
 
         return;
-
-        static bool Print(float diff) => new float[] { 1, 2, 3, 5, 10, 15, 30, 60 }.Contains(diff);
     }
 
     private void OnMapStart(string mapName)
