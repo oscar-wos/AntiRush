@@ -72,11 +72,17 @@ public partial class AntiRush
             var diffY = Math.Abs(value.AddZone.Points[0].Y - value.AddZone.Points[1].Y);
             var diffZ = Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z);
 
-            if (diffX < 10)
-                value.AddZone.Points[0].X += 10 - diffX;
+            if (diffX < 32)
+            {
+                value.AddZone.Points[0].X += (value.AddZone.Points[0].X >= value.AddZone.Points[1].X ? 1 : -1) * ((32 - diffX) / 2);
+                value.AddZone.Points[1].X += (value.AddZone.Points[0].X > value.AddZone.Points[1].X ? -1 : 1) * ((32 - diffX) / 2);
+            }
 
-            if (diffY < 10)
-                value.AddZone.Points[0].Y += 10 - diffY;
+            if (diffY < 32)
+            {
+                value.AddZone.Points[0].Y += (value.AddZone.Points[0].Y >= value.AddZone.Points[1].Y ? 1 : -1) * ((32 - diffY) / 2);
+                value.AddZone.Points[1].Y += (value.AddZone.Points[0].Y > value.AddZone.Points[1].Y ? -1 : 1) * ((32 - diffY) / 2);
+            }
 
             if (diffZ < 200)
             {
