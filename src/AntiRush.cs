@@ -31,6 +31,8 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
         Server.NextFrame(() =>
         {
+            _gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+
             foreach (var controller in Utilities.GetPlayers())
                 _playerData[controller] = new PlayerData();
 
