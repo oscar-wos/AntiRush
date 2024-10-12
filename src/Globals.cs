@@ -18,7 +18,6 @@ public partial class AntiRush
     private readonly List<Zone> _zones = [];
     private float _roundStart;
     private bool _bombPlanted;
-    private bool _warmup;
     private float[] _countdown = [];
     private CCSGameRules? _gameRules;
 }
