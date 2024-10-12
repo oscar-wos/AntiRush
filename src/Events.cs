@@ -11,8 +11,8 @@ public partial class AntiRush
         _roundStart = Server.CurrentTime;
         _bombPlanted = false;
 
-        var gameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
-        _warmup = gameRules.WarmupPeriod;
+        _gameRules ??= Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+        _warmup = _gameRules?.WarmupPeriod;
 
         foreach (var zone in _zones)
         {
