@@ -7,7 +7,7 @@ public partial class AntiRush
 {
     private void OnTick()
     {
-        if (_gameRules?.WarmupPeriod && !Config.Warmup)
+        if (!Config.Warmup && _gameRules is { WarmupPeriod: true })
             return;
 
         if (Config.NoRushTime != 0 && !_bombPlanted)
