@@ -1,13 +1,16 @@
 name: Build and Release
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
     build:
         runs-on: ubuntu-latest
 
         steps:
-            - name: checkout all the submodules
+            - name: Checkout repository
               uses: actions/checkout@v4
               with:
                 submodules: recursive
@@ -32,7 +35,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                  submodules: recursive
+                submodules: recursive
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
