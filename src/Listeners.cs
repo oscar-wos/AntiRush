@@ -1,5 +1,4 @@
 ﻿using CounterStrikeSharp.API;
-using AntiRush.Enums;
 
 namespace AntiRush;
 

@@ -1,8 +1,8 @@
-﻿using System.Drawing;
+﻿using Microsoft.Extensions.Localization;
+using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using Microsoft.Extensions.Localization;
 using AntiRush.Enums;
 
 namespace AntiRush;

@@ -28,7 +28,7 @@ public partial class AntiRush
 
     private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
     {
-        if (!Config.DisableOnBombPlant)
+        if (!Config.DisableOnBombPlant || !_minPlayers)
             return HookResult.Continue;
 
         _bombPlanted = true;
