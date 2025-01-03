@@ -1,5 +1,4 @@
 ﻿using CounterStrikeSharp.API;
-using AntiRush.Enums;
 
 namespace AntiRush;
 
@@ -8,6 +7,9 @@ public partial class AntiRush
     private void OnTick()
     {
         if (_gameRules is { WarmupPeriod: true } && !Config.Warmup)
+            return;
+
+        if (!_minPlayers)
             return;
 
         if (Config.NoRushTime != 0 && !_bombPlanted)

@@ -8,7 +8,7 @@ namespace AntiRush;
 public partial class AntiRush
 {
     public override string ModuleName => "AntiRush";
-    public override string ModuleVersion => "1.0.7";
+    public override string ModuleVersion => "1.0.8";
     public override string ModuleAuthor => "https://github.com/oscar-wos/AntiRush";
     public AntiRushConfig Config { get; set; } = new();
     public Menu.Menu Menu { get; } = new();
@@ -20,4 +20,5 @@ public partial class AntiRush
     private bool _bombPlanted;
     private float[] _countdown = [];
     private CCSGameRules? _gameRules;
+    private bool _minPlayers;
 }

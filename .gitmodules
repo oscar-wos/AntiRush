@@ -1,3 +1,6 @@
 [submodule "Menu"]
 	path = Menu
 	url = https://github.com/oscar-wos/Menu.git
+[submodule "CSSharpUtils"]
+	path = CSSharpUtils
+	url = https://github.com/oscar-wos/CSSharpUtils
