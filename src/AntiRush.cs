@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using AntiRush.Enums;
+using CSSharpUtils.Extensions;
 
 namespace AntiRush;
 
@@ -9,6 +10,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 {
     public void OnConfigParsed(AntiRushConfig config)
     {
+        if (config.Update())
+            config.Reload();
+
         Config = config;
         _countdown = Config.Countdown.Select(c => (float)c).ToArray();
     }

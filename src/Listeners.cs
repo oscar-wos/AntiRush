@@ -10,6 +10,9 @@ public partial class AntiRush
         if (_gameRules is { WarmupPeriod: true } && !Config.Warmup)
             return;
 
+        if (!_minPlayers)
+            return;
+
         if (Config.NoRushTime != 0 && !_bombPlanted)
         {
             var diff = (Config.NoRushTime + _roundStart) - Server.CurrentTime;

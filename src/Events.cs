@@ -1,6 +1,7 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CSSharpUtils.Utils;
 
 namespace AntiRush;
 
@@ -11,7 +12,8 @@ public partial class AntiRush
         _roundStart = Server.CurrentTime;
         _bombPlanted = false;
 
-        _gameRules ??= Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
+        _gameRules = GameUtils.GetGameRules();
+        _minPlayers = Utilities.GetPlayers().Where(p => p.Team == (CsTeam.Terrorist | CsTeam.CounterTerrorist)).ToList().Count >= Config.MinPlayers;
 
         foreach (var zone in _zones)
         {
