@@ -13,7 +13,7 @@ public partial class AntiRush
         _bombPlanted = false;
 
         _gameRules = GameUtils.GetGameRules();
-        _minPlayers = Utilities.GetPlayers().Where(p => p.Team == (CsTeam.Terrorist | CsTeam.CounterTerrorist)).ToList().Count >= Config.MinPlayers;
+        _minPlayers = Utilities.GetPlayers().Where(p => p.Team is CsTeam.CounterTerrorist or CsTeam.Terrorist).ToList().Count >= Config.MinPlayers;
 
         foreach (var zone in _zones)
         {
