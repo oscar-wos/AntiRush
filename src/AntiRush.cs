@@ -159,7 +159,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
             case ZoneType.Wall:
                 controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, Vector.Zero);
-
                 return;
         }
     }
