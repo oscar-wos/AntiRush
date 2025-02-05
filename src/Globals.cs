@@ -4,11 +4,11 @@ using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
 
-[MinimumApiVersion(245)]
+[MinimumApiVersion(304)]
 public partial class AntiRush
 {
     public override string ModuleName => "AntiRush";
-    public override string ModuleVersion => "1.0.8";
+    public override string ModuleVersion => "1.0.9";
     public override string ModuleAuthor => "https://github.com/oscar-wos/AntiRush";
     public AntiRushConfig Config { get; set; } = new();
     public Menu.Menu Menu { get; } = new();
