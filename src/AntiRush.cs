@@ -133,7 +133,14 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                controller.Bounce();
+                const PlayerButtons checkButtons = PlayerButtons.Forward | PlayerButtons.Back | PlayerButtons.Moveleft | PlayerButtons.Moveright;
+
+                if ((controller.Buttons & checkButtons) != 0)
+                    controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, new Vector(_playerData[controller].LastVel[0], _playerData[controller].LastVel[1], _playerData[controller].LastVel[2]));
+
+                else
+                    controller.Bounce(_playerData[controller].LastPos, _playerData[controller].LastVel);
+
                 return;
 
             case ZoneType.Hurt:

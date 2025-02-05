@@ -10,4 +10,6 @@ public class PlayerData
     public float LastMessage { get; set; }
     public bool Debug { get; set; }
     public bool[] DebugOptions { get; set; } = new bool[Enum.GetValues(typeof(ZoneType)).Length];
+    public float[] LastPos = [];
+    public float[] LastVel = [];
 }

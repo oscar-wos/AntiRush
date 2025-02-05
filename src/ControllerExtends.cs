@@ -1,6 +1,7 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Utils;
 
 namespace AntiRush;
 
@@ -16,7 +17,7 @@ public static class ControllerExtends
 
     public static void Damage(this CCSPlayerController? controller, int damage)
     {
-        if (controller == null || !controller.IsValid() || controller!.PlayerPawn.Value == null)
+        if (controller == null || !controller.IsValid() || controller.PlayerPawn.Value == null)
             return;
 
         controller.PlayerPawn.Value.Health -= damage;
@@ -26,17 +27,17 @@ public static class ControllerExtends
             controller.PlayerPawn.Value.CommitSuicide(true, true);
     }
 
-    public static void Bounce(this CCSPlayerController? controller)
+    public static void Bounce(this CCSPlayerController? controller, float[] lastPos, float[] lastVel)
     {
-        if (controller == null || !controller.IsValid() || controller!.PlayerPawn.Value == null)
+        if (controller == null || controller.PlayerPawn.Value == null)
             return;
 
-        var vel = controller.PlayerPawn.Value.AbsVelocity;
-        var speed = Math.Sqrt(vel.X * vel.X + vel.Y * vel.Y);
+        var vel = new Vector(lastVel[0], lastVel[1], lastVel[2]);
+        var speed = vel.Length2D();
 
-        vel *= (-350 / (float)speed);
+        vel *= (-350 / speed);
         vel.Z = vel.Z <= 0 ? 150 : Math.Min(vel.Z, 150);
-        controller.PlayerPawn.Value.Teleport(controller.PlayerPawn.Value.AbsOrigin, controller.PlayerPawn.Value.EyeAngles, vel);
+        controller.PlayerPawn.Value.Teleport(new Vector(lastPos[0], lastPos[1], lastPos[2]), null, vel);
     }
 
     public static bool HasPermission(this CCSPlayerController? controller, string permission)
