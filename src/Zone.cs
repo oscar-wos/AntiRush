@@ -32,6 +32,7 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
             ZoneType.Hurt => $"{ChatColors.Orange}{localize["zone.Hurt"]}{ChatColors.White}",
             ZoneType.Kill => $"{ChatColors.Red}{localize["zone.Kill"]}{ChatColors.White}",
             ZoneType.Teleport => $"{ChatColors.Magenta}{localize["zone.Teleport"]}{ChatColors.White}",
+            ZoneType.Wall => $"{ChatColors.Blue}{localize["zone.Wall"]}{ChatColors.White}",
             _ => ""
         };
     }
@@ -92,6 +93,7 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
             ZoneType.Hurt => Color.DarkOrange,
             ZoneType.Kill => Color.Red,
             ZoneType.Teleport => Color.Magenta,
+            ZoneType.Wall => Color.Blue,
             _ => Color.White
         };
     }
