@@ -116,7 +116,8 @@ public partial class AntiRush
                 new(Localizer["zone.Bounce"]) { Prefix = "<font color=\"#FFFF00\">", Suffix = "<font color=\"#FFFFFF\">" },
                 new(Localizer["zone.Hurt"]) { Prefix = "<font color=\"#FFA500\">", Suffix = "<font color=\"#FFFFFF\">" },
                 new(Localizer["zone.Kill"]) { Prefix = "<font color=\"#FF0000\">", Suffix = "<font color=\"#FFFFFF\">" },
-                new(Localizer["zone.Teleport"]) { Prefix = "<font color=\"#FF00FF\">", Suffix = "<font color=\"#FFFFFF\">" }
+                new(Localizer["zone.Teleport"]) { Prefix = "<font color=\"#FF00FF\">", Suffix = "<font color=\"#FFFFFF\">" },
+                new(Localizer["zone.Wall"]) { Prefix = "<font color=\"#0000FF\">", Suffix = "<font color=\"#FFFFFF\">" }
             };
 
             var teams = new List<MenuValue>
@@ -130,7 +131,9 @@ public partial class AntiRush
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Teams"]} "), teams, true));
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Name"]} ")));
 
-            addZoneMenu.AddItem(_playerData[controller].AddZone!.Items[0].Option != 0
+            var delayCheck = _playerData[controller].AddZone!.Items[0].Option != 0 && _playerData[controller].AddZone!.Items[0].Option != 4;
+
+            addZoneMenu.AddItem(delayCheck
                 ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Delay"]} "), new MenuValue($" {Localizer["menu.Seconds"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 

@@ -127,14 +127,14 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
     private void DoAction(CCSPlayerController controller, Zone zone)
     {
+        const PlayerButtons checkButtons = PlayerButtons.Forward | PlayerButtons.Back | PlayerButtons.Moveleft | PlayerButtons.Moveright;
+
         if (PrintAction(controller, zone))
             _playerData[controller].LastMessage = Server.CurrentTime;
 
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                const PlayerButtons checkButtons = PlayerButtons.Forward | PlayerButtons.Back | PlayerButtons.Moveleft | PlayerButtons.Moveright;
-
                 if ((controller.Buttons & checkButtons) != 0)
                     controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, new Vector(_playerData[controller].LastVel[0], _playerData[controller].LastVel[1], _playerData[controller].LastVel[2]));
 
@@ -155,6 +155,11 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
             case ZoneType.Teleport:
                 controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
+                return;
+
+            case ZoneType.Wall:
+                controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, Vector.Zero);
+
                 return;
         }
     }

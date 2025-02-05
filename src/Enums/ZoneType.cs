@@ -5,5 +5,6 @@ public enum ZoneType
     Bounce = 0,
     Hurt = 1,
     Kill = 2,
-    Teleport = 3
+    Teleport = 3,
+    Wall = 4
 }
