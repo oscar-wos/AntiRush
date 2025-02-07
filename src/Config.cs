@@ -5,7 +5,7 @@ namespace AntiRush;
 
 public class AntiRushConfig : BasePluginConfig
 {
-    public override int Version { get; set; } = 7;
+    public override int Version { get; set; } = 8;
     [JsonPropertyName("Messages")] public string Messages { get; set; } = "simple";
     [JsonPropertyName("DrawZones")] public bool DrawZones { get; set; } = false;
     [JsonPropertyName("Warmup")] public bool Warmup { get; set; } = false;
@@ -17,4 +17,5 @@ public class AntiRushConfig : BasePluginConfig
     [JsonPropertyName("CampZones")] public int[] CampZones { get; set; } = [1];
     [JsonPropertyName("Countdown")] public int[] Countdown { get; set; } = [60, 30, 15, 10, 5, 3, 2, 1];
     [JsonPropertyName("MinPlayers")] public int MinPlayers { get; set; } = 1;
+    [JsonPropertyName("MaxPlayers")] public int MaxPlayers { get; set; } = 64;
 }

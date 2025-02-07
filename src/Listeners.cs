@@ -9,7 +9,7 @@ public partial class AntiRush
         if (_gameRules is { WarmupPeriod: true } && !Config.Warmup)
             return;
 
-        if (!_minPlayers)
+        if (!_minPlayers || !_maxPlayers)
             return;
 
         if (Config.NoRushTime != 0 && !_bombPlanted)
