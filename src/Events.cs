@@ -9,11 +9,13 @@ public partial class AntiRush
 {
     private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
     {
-        _roundStart = Server.CurrentTime;
         _bombPlanted = false;
-
         _gameRules = GameUtils.GetGameRules();
-        _minPlayers = Utilities.GetPlayers().Where(p => p.Team is CsTeam.CounterTerrorist or CsTeam.Terrorist).ToList().Count >= Config.MinPlayers;
+        _roundStart = Server.CurrentTime;
+
+        var count = Utilities.GetPlayers().Where(p => p.Team is CsTeam.CounterTerrorist or CsTeam.Terrorist).ToList().Count;
+        _minPlayers = count >= Config.MinPlayers;
+        _maxPlayers = count < Config.MaxPlayers;
 
         foreach (var zone in _zones)
         {
