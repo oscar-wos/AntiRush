@@ -1,10 +1,10 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using CSSharpUtils.Utils;
-using FixVectorLeak.src.Structs;
 using AntiRush.Extensions;
+using CSSharpUtils.Utils;
 using FixVectorLeak.src;
+using FixVectorLeak.src.Structs;
 
 namespace AntiRush;
 
@@ -16,7 +16,7 @@ public partial class AntiRush
         _gameRules = GameUtils.GetGameRules();
         _roundStart = Server.CurrentTime;
 
-        var count = Utilities.GetPlayers().Where(p => p.Team is CsTeam.CounterTerrorist or CsTeam.Terrorist).ToList().Count;
+        var count = Utilities.GetPlayers().Where(p => p.Team is (CsTeam.CounterTerrorist or CsTeam.Terrorist)).ToList().Count;
         _minPlayers = count >= Config.MinPlayers;
         _maxPlayers = count < Config.MaxPlayers;
 
@@ -33,7 +33,7 @@ public partial class AntiRush
 
     private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
     {
-        if (!Config.DisableOnBombPlant || !_minPlayers)
+        if (!Config.DisableOnBombPlant || !_minPlayers || !_maxPlayers)
             return HookResult.Continue;
 
         _bombPlanted = true;
@@ -46,7 +46,7 @@ public partial class AntiRush
     {
         var player = @event.Userid;
 
-        if (player == null || !player.IsValid() || player.PlayerPawn.Value == null || player.PlayerPawn.Value.AbsOrigin == null)
+        if (player == null || !player.IsValid() || player.PlayerPawn.Value?.AbsOrigin == null)
             return HookResult.Continue;
 
         var origin = player.PlayerPawn.Value.AbsOrigin.ToVector_t();
@@ -64,7 +64,7 @@ public partial class AntiRush
         if (player == null || !player.IsValid() || !_playerData.TryGetValue(player, out var playerData) || playerData.AddZoneMenu == null || !Menu.IsCurrentMenu(player, playerData.AddZoneMenu))
             return HookResult.Continue;
 
-        if (playerData.AddZoneMenu is null || playerData.AddZoneMenu.Points[0] is not null && playerData.AddZoneMenu.Points[1] is not null)
+        if (playerData.AddZoneMenu.Points[0] is not null && playerData.AddZoneMenu.Points[1] is not null)
             return HookResult.Continue;
 
         if (Server.CurrentTime - playerData.AddZoneMenu.LastShot < 0.1)
@@ -100,12 +100,14 @@ public partial class AntiRush
             if (diffZ < 200)
             {
                 if (playerData.AddZoneMenu.Points[0]!.Value.Z >= playerData.AddZoneMenu.Points[1]!.Value.Z)
-                    playerData.AddZoneMenu.Points[0] = new Vector_t(playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z + ((playerData.AddZoneMenu.Points[0]!.Value.Z >= playerData.AddZoneMenu.Points[1]!.Value.Z ? 1 : -1) * ((200 - diffZ) / 2)));
+                    playerData.AddZoneMenu.Points[0] = new Vector_t(playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z + 200 - diffZ);
                 else
-                    playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z + ((playerData.AddZoneMenu.Points[0]!.Value.Z > playerData.AddZoneMenu.Points[1]!.Value.Z ? -1 : 1) * ((200 - diffZ) / 2)));
+                    playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z + 200 - diffZ);
             }
 
-            playerData.AddZone = new Zone([playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z], [playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z]);
+            playerData.AddZone ??= new Zone([0, 0, 0], [0, 0, 0]);
+            playerData.AddZone.MinPoint = [playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z];
+            playerData.AddZone.MaxPoint = [playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z];
             playerData.AddZone.Draw();
         }
 

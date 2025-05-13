@@ -10,7 +10,7 @@ public partial class AntiRush
 {
     public void CommandAntiRush(CCSPlayerController? player, CommandInfo info)
     {
-        if (player == null || !player.IsValid(true) || player.HasPermission("@css/generic")) 
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/generic")) 
             return;
 
         BuildMenu(player);
@@ -18,7 +18,7 @@ public partial class AntiRush
 
     public void CommandAddZone(CCSPlayerController? player, CommandInfo info)
     {
-        if (player == null || !player.IsValid(true) || player.HasPermission("@css/root"))
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/root"))
             return;
 
         BuildMenu(player);
@@ -27,7 +27,7 @@ public partial class AntiRush
 
     public void CommandViewZones(CCSPlayerController? player, CommandInfo info)
     {
-        if (player == null || !player.IsValid(true) || player.HasPermission("@css/generic"))
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/generic"))
             return;
 
         BuildMenu(player);

@@ -3,9 +3,9 @@ using CounterStrikeSharp.API.Modules.Admin;
 using Menu;
 using Menu.Enums;
 using AntiRush.Enums;
+using AntiRush.Extensions;
 using CSSharpUtils.Extensions;
 using FixVectorLeak.src.Structs;
-using AntiRush.Extensions;
 
 namespace AntiRush;
 
@@ -23,7 +23,6 @@ public partial class AntiRush
                 for (var i = 0; i < 2; i++)
                     playerData.AddZoneMenu.Points[i] = null;
 
-                playerData.AddZoneMenu.LastShot = 0;
                 playerData.AddZoneMenu = null;
             }
 
@@ -72,7 +71,7 @@ public partial class AntiRush
                 new(Localizer["zone.Teleport"])
             };
 
-            mainMenu.AddItem(new MenuItem(MenuItemType.ChoiceBool, debugOptions, true) { Data = _playerData[player].DebugOptions.Select(o => o ? 1 : 0).ToArray() });
+            mainMenu.AddItem(new MenuItem(MenuItemType.ChoiceBool, debugOptions, true) { Data = [.. _playerData[player].DebugOptions.Select(o => o ? 1 : 0)] });
         }
 
         if (updateMenu)
@@ -134,7 +133,7 @@ public partial class AntiRush
                 new(Localizer["both"]) { Prefix = "<font color=\"#C2AD7D\">", Suffix = "<font color=\"#FFFFFF\">" }
             };
 
-            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Type"]} "), zoneTypes));
+            addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Type"]} "), zoneTypes, true));
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Teams"]} "), teams, true));
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Name"]} ")));
 
@@ -167,7 +166,6 @@ public partial class AntiRush
             }
         }
 
-        _playerData[player].AddZone?.Draw();
         _playerData[player].AddZoneMenu = addZoneMenu;
 
         Menu.AddMenu(player, addZoneMenu, (buttons, menu, selectedItem) =>

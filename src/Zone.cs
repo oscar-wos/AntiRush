@@ -37,7 +37,7 @@ public class Zone
     public float[] MinPoint;
     public float[] MaxPoint;
     public Dictionary<CCSPlayerController, ZoneData> Data { get; set; } = [];
-    public CBeam[] Beams { get; set; } = [];
+    public List<CBeam> Beams { get; } = [];
 
     public bool IsInZone(float x, float y, float z)
     {
@@ -80,7 +80,7 @@ public class Zone
             beam.AcceptInput("Kill");
         }
 
-        Beams = [];
+        Beams.Clear();
     }
 
     public void Draw()
@@ -123,10 +123,13 @@ public class Zone
             return null;
 
         beam.Teleport(start);
-        beam.EndPos.Add(new Vector(end.X, end.Y, end.Z));
+        beam.EndPos.X = end.X;
+        beam.EndPos.Y = end.Y;
+        beam.EndPos.Z = end.Z;
         beam.Render = GetBeamColor();
         beam.Width = 1f;
         beam.DispatchSpawn();
+        Beams.Add(beam);
 
         return beam;
     }
