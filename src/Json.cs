@@ -46,7 +46,7 @@ public partial class AntiRush
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
 
-        path += $"{mapName}.json";
+        path += $"/{mapName}.json";
 
         if (_zones.Count == 0)
             return;

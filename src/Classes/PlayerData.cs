@@ -13,5 +13,5 @@ public class PlayerData
     public Vector_t? SpawnPos { get; set; } = null;
     public float[] LastPos { get; set; } = [];
     public float[] LastVel { get; set; } = [];
-    public float BlockButtons { get; set; } = 0;
+    public double BlockButtons { get; set; } = 0;
 }

@@ -1,4 +1,6 @@
-﻿using CounterStrikeSharp.API;
+﻿using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using AntiRush.Classes;
@@ -46,17 +48,30 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
             if (Config.RestartOnLoad)
                 Server.ExecuteCommand("mp_restartgame 1");
         });
+
+        _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+        Logger.LogInformation("{ModuleName} loaded successfully!", ModuleName);
+        _ProcessMovement = new(GameData.GetSignature("RunCommand"));
+        _ProcessMovement!.Hook(OnProcessMovement, HookMode.Pre);
+    }
+
+    public override void Unload(bool isReload)
+    {
+        Logger.LogInformation("{ModuleName} unloaded successfully!", ModuleName);
+        _ProcessMovement!.Unhook(OnProcessMovement, HookMode.Pre);
     }
 
     private void SaveZone(CCSPlayerController player)
     {
         var menu = _playerData[player].AddZoneMenu;
+        _playerData[player].AddZone?.Clear();
          
         CsTeam[] teams = menu!.Items[1].Option switch
         {
-            0 => [CsTeam.Terrorist],
-            1 => [CsTeam.CounterTerrorist],
-            2 => [CsTeam.Terrorist, CsTeam.CounterTerrorist],
+            0 => [CsTeam.Terrorist, CsTeam.CounterTerrorist],
+            1 => [CsTeam.Terrorist],
+            2 => [CsTeam.CounterTerrorist],
             _ => []
         };
 
@@ -91,6 +106,9 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
         if (Config.DrawZones)
             zone.Draw();
+
+        if (_playerData.TryGetValue(player, out var playerData))
+            playerData.AddZone?.Clear();
     }
 
     private bool PrintAction(CCSPlayerController player, Zone zone)
@@ -98,7 +116,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         if (!player.IsValid(true) || !(Server.CurrentTime - _playerData[player].LastMessage >= 1))
             return false;
 
-        if (zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 != 0)
+        if (zone.Type is ZoneType.Hurt && Server.CurrentTime % 1 != 0)
             return false;
 
         switch (Config.Messages)
@@ -108,7 +126,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return true;
 
             case "detailed":
-                if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
+                if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport or ZoneType.Wall))
                 {
                     player.PrintToChat(Config.NoRushTime != 0
                         ? $"{Prefix}{Localizer["rushDelayRemaining", zone.ToString(Localizer), (_roundStart + Config.NoRushTime - Server.CurrentTime).ToString("0")]}"
@@ -117,7 +135,7 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                     return true;
                 }
 
-                if (zone.Type == ZoneType.Hurt)
+                if (zone.Type is ZoneType.Hurt)
                 {
                     player.PrintToChat($"{Prefix}{Localizer["hurtDamage", zone.ToString(Localizer), zone.Damage]}");
                     return true;
@@ -138,10 +156,12 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         if (PrintAction(player, zone))
             _playerData[player].LastMessage = Server.CurrentTime;
 
+        if (zone.Type is (ZoneType.Bounce or ZoneType.Wall))
+            _playerData[player].BlockButtons = Server.TickedTime + 0.3;
+
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                _playerData[player].BlockButtons = (float)Server.TickedTime + 1;
                 player.Bounce(_playerData[player].LastPos, _playerData[player].LastVel);
 
                 return;

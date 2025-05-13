@@ -1,9 +1,10 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
 using AntiRush.Classes;
+using AntiRush.Extensions;
 using FixVectorLeak.src;
 using FixVectorLeak.src.Structs;
-using AntiRush.Extensions;
 
 namespace AntiRush;
 
@@ -25,58 +26,6 @@ public partial class AntiRush
             if (!_playerData.TryGetValue(player, out var playerData))
                 continue;
 
-            if (playerData.BlockButtons != 0)
-            {
-                if (Server.TickedTime < playerData.BlockButtons)
-                {
-                    if (player.PlayerPawn.Value?.MovementServices is null)
-                        continue;
-
-                    player.PrintToCenterHtml(Server.TickedTime + "<br>" + playerData.BlockButtons.ToString());
-
-                    const PlayerButtons checkButtons = PlayerButtons.Forward | PlayerButtons.Back | PlayerButtons.Moveleft | PlayerButtons.Moveright | PlayerButtons.Jump | PlayerButtons.Duck;
-
-
-                    var playerMovementServices = new CCSPlayer_MovementServices(player.PlayerPawn.Value.MovementServices.Handle);
-                    var playerMovementSers = player.PlayerPawn.Value.MovementServices;
-                    playerMovementSers.QueuedButtonChangeMask &= (ulong)~checkButtons;
-                    playerMovementSers.QueuedButtonDownMask &= (ulong)~checkButtons;
-                    playerMovementSers.ToggleButtonDownMask &= (ulong)~checkButtons;
-
-                    playerMovementServices.Buttons.ButtonStates[0] &= (ulong)~checkButtons;
-                    playerMovementServices.Buttons.ButtonStates[1] &= (ulong)~checkButtons;
-                    playerMovementServices.Buttons.ButtonStates[2] &= (ulong)~checkButtons;
-
-
-                    playerMovementServices.QueuedButtonChangeMask &= (ulong)~checkButtons;
-                    playerMovementServices.QueuedButtonDownMask &= (ulong)~checkButtons;
-                    playerMovementServices.ButtonDownMaskPrev &= (ulong)~checkButtons;
-                    playerMovementServices.ToggleButtonDownMask &= (ulong)~checkButtons;
-
-                    playerMovementSers.LeftMove = 0;
-                    playerMovementSers.ForwardMove = 0;
-
-                    playerMovementServices.LeftMove = 0;
-                    playerMovementServices.ForwardMove = 0;
-
-                    playerMovementSers.LastMovementImpulses[0] = 0;
-                    playerMovementSers.LastMovementImpulses[1] = 0;
-                    playerMovementSers.LastMovementImpulses[2] = 0;
-
-                    playerMovementServices.LastMovementImpulses[0] = 0;
-                    playerMovementServices.LastMovementImpulses[1] = 0;
-                    playerMovementServices.LastMovementImpulses[2] = 0;
-
-                    playerMovementSers.Buttons.ButtonStates[0] &= (ulong)~checkButtons;
-                    playerMovementSers.Buttons.ButtonStates[1] &= (ulong)~checkButtons;
-                    playerMovementSers.Buttons.ButtonStates[2] &= (ulong)~checkButtons;
-
-                    //playerMovementSers.ButtonDownMaskPrev &= (ulong)~checkButtons;
-                }
-                else
-                    playerData.BlockButtons = 0;
-            }
-
             var doAction = false;
             Vector_t origin = player.PlayerPawn.Value.AbsOrigin.ToVector_t();
             Vector_t velocity = player.PlayerPawn.Value.AbsVelocity.ToVector_t();
@@ -84,7 +33,10 @@ public partial class AntiRush
             foreach (var zone in _zones)
             {
                 if (((Config.NoRushTime != 0 && Config.NoRushTime + _roundStart < Server.CurrentTime) || _bombPlanted) && Config.RushZones.Contains((int)zone.Type))
+                {
+                    zone.Clear();
                     continue;
+                }
 
                 if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && Config.CampZones.Contains((int)zone.Type))
                     continue;
@@ -130,8 +82,8 @@ public partial class AntiRush
             if (doAction)
                 continue;
 
-            _playerData[player].LastPos = [origin.X, origin.Y, origin.Z];
-            _playerData[player].LastVel = [velocity.X, velocity.Y, velocity.Z];
+            playerData.LastPos = [origin.X, origin.Y, origin.Z];
+            playerData.LastVel = [velocity.X, velocity.Y, velocity.Z];
         }
 
         if (Config.NoRushTime != 0 && !_bombPlanted)
@@ -170,5 +122,40 @@ public partial class AntiRush
             return;
 
         _playerData[player] = new PlayerData();
+    }
+
+    private HookResult OnProcessMovement(DynamicHook h)
+    {
+        try
+        {
+            CCSPlayer_MovementServices ms = h.GetParam<CCSPlayer_MovementServices>(0);
+            var player = ms.Pawn.Value.Controller.Value?.As<CCSPlayerController>();
+
+            if (player == null || !player.IsValid() || !_playerData.TryGetValue(player, out var playerData))
+                return HookResult.Continue;
+
+            CUserCmd userCmd = new(h.GetParam<IntPtr>(_isLinux ? 1 : 2));
+            var baseCmd = userCmd.GetBaseCmd();
+
+            if (playerData.BlockButtons != 0)
+            {
+                if (Server.TickedTime >= playerData.BlockButtons)
+                    playerData.BlockButtons = 0;
+                else
+                {
+                    baseCmd.DisableForwardMove();
+                    baseCmd.DisableSideMove();
+                    baseCmd.DisableUpMove();
+
+                    userCmd.DisableInput(h.GetParam<IntPtr>(_isLinux ? 1 : 2), 6); //disable jump (2) + duck (4) = 6
+                }
+            }
+
+            return HookResult.Changed;
+        }
+        catch (Exception)
+        {
+            return HookResult.Continue;
+        }
     }
 }
