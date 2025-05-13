@@ -1,61 +1,68 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
-using CounterStrikeSharp.API.Modules.Utils;
 using Menu;
 using Menu.Enums;
 using AntiRush.Enums;
+using CSSharpUtils.Extensions;
+using FixVectorLeak.src.Structs;
+using AntiRush.Extensions;
 
 namespace AntiRush;
 
 public partial class AntiRush
 {
-    private void BuildMenu(CCSPlayerController controller, MenuType type = MenuType.Main)
+    private void BuildMenu(CCSPlayerController player, MenuType type = MenuType.Main)
     {
-        if (!controller.IsValid())
+        if (!player.IsValid())
             return;
 
-        if (_playerData.TryGetValue(controller, out var value) && value.AddZone != null)
+        if (_playerData.TryGetValue(player, out var playerData))
         {
-            for (var i = 0; i < 2; i++)
-                value.AddZone.Points[i] = Vector.Zero;
+            if (playerData.AddZoneMenu is not null)
+            {
+                for (var i = 0; i < 2; i++)
+                    playerData.AddZoneMenu.Points[i] = null;
 
-            value.AddZone.LastShot = 0;
-            _playerData[controller].AddZone = null;
+                playerData.AddZoneMenu.LastShot = 0;
+                playerData.AddZoneMenu = null;
+            }
+
+            playerData.AddZone?.Clear();
         }
 
         switch (type)
         {
             case MenuType.Main:
-                BuildMainMenu(controller);
+                BuildMainMenu(player);
                 break;
 
             case MenuType.Add:
-                BuildAddZoneMenu(controller);
+                BuildAddZoneMenu(player);
                 break;
 
             case MenuType.View:
-                BuildViewZoneMenu(controller);
+                BuildViewZoneMenu(player);
                 break;
         }
     }
 
-    private void BuildMainMenu(CCSPlayerController controller, bool updateMenu = false)
+    private void BuildMainMenu(CCSPlayerController player, bool updateMenu = false)
     {
         var mainMenu = new MenuBase(new MenuValue("AntiRush") { Prefix = "<font class=\"fontSize-l\">", Suffix = "<font class=\"fontSize-m\">" });
 
         var customButtons = new List<MenuValue>
         {
             new CustomButton(Localizer["menu.Add"], c => BuildMenu(c, MenuType.Add)) { Suffix = "<font color=\"#FFFFFF\">" },
-            new CustomButton(Localizer["menu.View"], c=> BuildMenu(c, MenuType.View))
+            new CustomButton(Localizer["menu.View"], c => BuildMenu(c, MenuType.View))
         };
 
-        customButtons[0].Prefix = !AdminManager.PlayerHasPermissions(controller, "@css/root") ? "<font color=\"#808080\">" : "";
+        customButtons[0].Prefix = !AdminManager.PlayerHasPermissions(player, "@css/root") ? "<font color=\"#808080\">" : "";
 
         mainMenu.AddItem(new MenuItem(MenuItemType.Button, customButtons));
         mainMenu.AddItem(new MenuItem(MenuItemType.Spacer));
-        mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue($"{Localizer["menu.Debug"]} ")) { Data = [_playerData[controller].Debug ? 1 : 0] });
+        mainMenu.AddItem(new MenuItem(MenuItemType.Bool, new MenuValue($"{Localizer["menu.Debug"]} ")) { Data = [_playerData[player].Debug ? 1 : 0] });
 
-        if (_playerData[controller].Debug)
+        if (_playerData[player].Debug)
         {
             var debugOptions = new List<MenuValue>
             {
@@ -65,13 +72,13 @@ public partial class AntiRush
                 new(Localizer["zone.Teleport"])
             };
 
-            mainMenu.AddItem(new MenuItem(MenuItemType.ChoiceBool, debugOptions, true) { Data = _playerData[controller].DebugOptions.Select(o => o ? 1 : 0).ToArray() });
+            mainMenu.AddItem(new MenuItem(MenuItemType.ChoiceBool, debugOptions, true) { Data = _playerData[player].DebugOptions.Select(o => o ? 1 : 0).ToArray() });
         }
 
         if (updateMenu)
             mainMenu.Option = 1;
 
-        Menu.SetMenu(controller, mainMenu, (buttons, menu, selectedItem) =>
+        Menu.SetMenu(player, mainMenu, (buttons, menu, selectedItem) =>
         {
             if (buttons != MenuButtons.Select)
                 return;
@@ -79,35 +86,35 @@ public partial class AntiRush
             switch (menu.Option)
             {
                 case 0:
-                    if (selectedItem!.Option == 0 && !controller.HasPermission("@css/root"))
+                    if (selectedItem!.Option == 0 && !player.HasPermission("@css/root"))
                     {
-                        controller.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/root"]}");
+                        player.PrintToChat($"{Prefix}{Localizer["missingPermission", "@css/root"]}");
                         return;
                     }
 
                     var customButton = (CustomButton)selectedItem.Values![selectedItem.Option];
-                    customButton.Callback.Invoke(controller);
+                    customButton.Callback.Invoke(player);
                     break;
 
                 case 1:
-                    _playerData[controller].Debug = !_playerData[controller].Debug;
-                    BuildMainMenu(controller, true);
+                    _playerData[player].Debug = !_playerData[player].Debug;
+                    BuildMainMenu(player, true);
                     break;
 
                 case 2:
-                    _playerData[controller].DebugOptions[selectedItem!.Option] = !_playerData[controller].DebugOptions[selectedItem.Option];
+                    _playerData[player].DebugOptions[selectedItem!.Option] = !_playerData[player].DebugOptions[selectedItem.Option];
                     break;
             }
         });
     }
 
-    private void BuildAddZoneMenu(CCSPlayerController controller)
+    private void BuildAddZoneMenu(CCSPlayerController player)
     {
-        var addZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.Add"]) { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" } };
+        var addZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.Add"]) { Suffix = "<font class=\"fontSize-m\">" }) { Input = new MenuValue("____") { Prefix = "<font color=\"#00FF00\">", Suffix = "<font color=\"#FFFFFF\">" }};
 
-        if (_playerData[controller].AddZone == null)
+        if (_playerData[player].AddZoneMenu == null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "1"])));
-        else if (_playerData[controller].AddZone!.Points[1].IsZero())
+        else if (_playerData[player].AddZoneMenu!.Points[1] is null)
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.Shoot", "2"])));
         else
         {
@@ -131,13 +138,13 @@ public partial class AntiRush
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Choice, new MenuValue($"{Localizer["menu.Teams"]} "), teams, true));
             addZoneMenu.AddItem(new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Name"]} ")));
 
-            var delayCheck = _playerData[controller].AddZone!.Items[0].Option != 0 && _playerData[controller].AddZone!.Items[0].Option != 4;
+            var delayCheck = _playerData[player].AddZoneMenu!.Items[0].Option != 0 && _playerData[player].AddZoneMenu!.Items[0].Option != 4;
 
             addZoneMenu.AddItem(delayCheck
                 ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Delay"]} "), new MenuValue($" {Localizer["menu.Seconds"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 
-            addZoneMenu.AddItem(_playerData[controller].AddZone!.Items[0].Option == 1
+            addZoneMenu.AddItem(_playerData[player].AddZoneMenu!.Items[0].Option == 1
                 ? new MenuItem(MenuItemType.Input, new MenuValue($"{Localizer["menu.Damage"]} "), new MenuValue($" {Localizer["menu.PerSecond"]}"))
                 : new MenuItem(MenuItemType.Spacer));
 
@@ -147,22 +154,23 @@ public partial class AntiRush
             addZoneMenu.Items[4].DataString = "10";
         }
 
-        if (_playerData[controller].AddZone != null)
+        if (_playerData[player].AddZoneMenu != null)
         {
-            addZoneMenu.Points = _playerData[controller].AddZone!.Points;
-            addZoneMenu.Option = _playerData[controller].AddZone!.Option;
-            addZoneMenu.LastShot = _playerData[controller].AddZone!.LastShot;
+            addZoneMenu.Points = _playerData[player].AddZoneMenu!.Points;
+            addZoneMenu.Option = _playerData[player].AddZoneMenu!.Option;
+            addZoneMenu.LastShot = _playerData[player].AddZoneMenu!.LastShot;
 
-            for (var i = 0; i < _playerData[controller].AddZone!.Items.Count; i++)
+            for (var i = 0; i < _playerData[player].AddZoneMenu!.Items.Count; i++)
             {
-                addZoneMenu.Items[i].Option = _playerData[controller].AddZone!.Items[i].Option;
-                addZoneMenu.Items[i].DataString = _playerData[controller].AddZone!.Items[i].DataString;
+                addZoneMenu.Items[i].Option = _playerData[player].AddZoneMenu!.Items[i].Option;
+                addZoneMenu.Items[i].DataString = _playerData[player].AddZoneMenu!.Items[i].DataString;
             }
         }
 
-        _playerData[controller].AddZone = addZoneMenu;
+        _playerData[player].AddZone?.Draw();
+        _playerData[player].AddZoneMenu = addZoneMenu;
 
-        Menu.AddMenu(controller, addZoneMenu, (buttons, menu, selectedItem) =>
+        Menu.AddMenu(player, addZoneMenu, (buttons, menu, selectedItem) =>
         {
             if (buttons == MenuButtons.Input)
             {
@@ -173,7 +181,7 @@ public partial class AntiRush
                 {
                     if (!float.TryParse(selectedItem!.DataString, out var delay))
                     {
-                        controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
+                        player.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "float"]}");
                         selectedItem.DataString = "0.0";
                     }
                     else
@@ -182,27 +190,27 @@ public partial class AntiRush
 
                 if (menu.Option == 4 && !int.TryParse(selectedItem!.DataString, out _))
                 {
-                    controller.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "int"]}");
+                    player.PrintToChat($"{Prefix}{Localizer["invalidInput", selectedItem.DataString, "int"]}");
                     selectedItem.DataString = "10";
                 }
             }
 
             if (buttons is MenuButtons.Left or MenuButtons.Right && selectedItem is { Type: MenuItemType.Choice })
             {
-                Menu.PopMenu(controller, menu);
-                BuildAddZoneMenu(controller);
+                Menu.PopMenu(player, menu);
+                BuildAddZoneMenu(player);
             }
 
             if (buttons != MenuButtons.Select || selectedItem is not { Type: MenuItemType.Button })
                 return;
 
             var customButton = (CustomButton)selectedItem.Values![selectedItem.Option];
-            customButton.Callback.Invoke(controller);
-            Menu.ClearMenus(controller);
+            customButton.Callback.Invoke(player);
+            Menu.ClearMenus(player);
         });
     }
 
-    private void BuildViewZoneMenu(CCSPlayerController controller)
+    private void BuildViewZoneMenu(CCSPlayerController player)
     {
         var viewZoneMenu = new AddZoneMenu(new MenuValue(Localizer["menu.View"]) { Suffix = "<font class=\"fontSize-m\">" });
         viewZoneMenu.AddItem(new MenuItem(MenuItemType.Text, new MenuValue(Localizer["menu.None"])));
@@ -229,7 +237,7 @@ public partial class AntiRush
         }
         */
 
-        Menu.AddMenu(controller, viewZoneMenu, (buttons, menu, selectedItem) =>
+        Menu.AddMenu(player, viewZoneMenu, (buttons, menu, selectedItem) =>
         {
 
         });
@@ -243,7 +251,7 @@ public class CustomButton(string value, Action<CCSPlayerController> callback) : 
 
 public class AddZoneMenu(MenuValue title) : MenuBase(title)
 {
-    public Vector[] Points { get; set; } = [Vector.Zero, Vector.Zero];
+    public Vector_t?[] Points { get; set; } = [null, null];
     public float LastShot { get; set; }
 }
 

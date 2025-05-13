@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Modules.Utils;
 using AntiRush.Enums;
 
@@ -6,10 +8,15 @@ namespace AntiRush;
 
 public partial class AntiRush
 {
+    private readonly JsonSerializerOptions jsonSerializerOptions = new()
+    {
+        WriteIndented = true,
+    };
+
     public void LoadJson(string mapName)
     {
         _zones.Clear();
-        var path = $"../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/{mapName}.json";
+        var path = Path.Join(Server.GameDirectory, "csgo", "addons", "counterstrikesharp", "configs", "plugins", "AntiRush", $"{mapName}.json");
 
         if (!File.Exists(path))
             return;
@@ -22,19 +29,19 @@ public partial class AntiRush
 
         foreach (var zone in jsonZones)
             _zones.Add(new Zone(
-                zone.name,
-                (ZoneType)zone.type,
-                zone.delay,
-                zone.damage,
-                zone.teams.Select(t => (CsTeam)Enum.ToObject(typeof(CsTeam), t)).ToArray(),
-                new Vector(Math.Min(zone.x[0], zone.y[0]), Math.Min(zone.x[1], zone.y[1]), Math.Min(zone.x[2], zone.y[2])),
-                new Vector(Math.Max(zone.x[0], zone.y[0]), Math.Max(zone.x[1], zone.y[1]), Math.Max(zone.x[2], zone.y[2]))
+                zone.Name,
+                (ZoneType)zone.Type,
+                zone.Delay,
+                zone.Damage,
+                [.. zone.Teams.Select(t => (CsTeam)Enum.ToObject(typeof(CsTeam), t))],
+                [Math.Min(zone.X[0], zone.Y[0]), Math.Min(zone.X[1], zone.Y[1]), Math.Min(zone.X[2], zone.Y[2])],
+                [Math.Max(zone.X[0], zone.Y[0]), Math.Max(zone.X[1], zone.Y[1]), Math.Max(zone.X[2], zone.Y[2])]
             ));
     }
 
     public void SaveJson(string mapName)
     {
-        var path = "../../csgo/addons/counterstrikesharp/configs/plugins/AntiRush/";
+        var path = Path.Join(Server.GameDirectory, "csgo", "addons", "counterstrikesharp", "configs", "plugins", "AntiRush");
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
@@ -49,28 +56,28 @@ public partial class AntiRush
         jsonZones.AddRange(from zone in _zones
             select new JsonZone()
             {
-                name = zone.Name,
-                type = (int)zone.Type,
-                delay = zone.Delay,
-                damage = zone.Damage,
-                teams = zone.Teams.Select(team => (int)team).ToArray(),
-                x = [zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z],
-                y = [zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z]
+                Name = zone.Name,
+                Type = (int)zone.Type,
+                Delay = zone.Delay,
+                Damage = zone.Damage,
+                Teams = [.. zone.Teams.Select(team => (int)team)],
+                X = [zone.MinPoint[0], zone.MinPoint[1], zone.MinPoint[2]],
+                Y = [zone.MaxPoint[0], zone.MaxPoint[1], zone.MaxPoint[2]]
             }
         );
 
-        var json = JsonSerializer.Serialize(jsonZones, new JsonSerializerOptions() { WriteIndented = true });
+        var json = JsonSerializer.Serialize(jsonZones, jsonSerializerOptions);
         File.WriteAllText(path, json);
     }
 }
 
 public class JsonZone
 {
-    public required string name { get; set; }
-    public required int type { get; set; }
-    public required float delay { get; set; }
-    public required int damage { get; set; }
-    public required int[] teams { get; set; }
-    public required float[] x { get; set; }
-    public required float[] y { get; set; }
+    [JsonPropertyName("name")] public required string Name { get; set; }
+    [JsonPropertyName("type")] public required int Type { get; set; }
+    [JsonPropertyName("delay")] public required float Delay { get; set; }
+    [JsonPropertyName("damage")] public required int Damage { get; set; }
+    [JsonPropertyName("teams")] public required int[] Teams { get; set; }
+    [JsonPropertyName("x")] public required float[] X { get; set; }
+    [JsonPropertyName("y")] public required float[] Y { get; set; }
 }

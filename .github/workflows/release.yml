@@ -51,33 +51,27 @@ jobs:
             - name: Create Directories
               run: |
                 mkdir -p plugin/plugins/${{ github.event.repository.name }}
-                mkdir -p plugin/shared/Menu
 
             - name: Move Files
               run: |
                 mv ./src/bin/Release/net8.0/* ./plugin/plugins/${{ github.event.repository.name }}
-                mv ./Menu/src/bin/Release/net8.0/* ./plugin/shared/Menu
-
-            - name: Remove .API
-              run: |
-                rm ./plugin/plugins/${{ github.event.repository.name }}/Menu.*
 
             - name: Zip
               run: |
                 cd ./plugin
                 zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
 
-            - name: Extract version
-              id: extract_version
-              run: |
-                version=$(grep -oP 'public override string ModuleVersion => "\K(.*)(?=";)' ./src/Globals.cs)
-                echo "::set-output name=version::$version"
-
             - name: Publish
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ github.event.repository.name }}-${{ github.sha }}
                 path: ./plugin
+
+            - name: Extract version
+              id: extract_version
+              run: |
+                version=$(grep -oP 'public override string ModuleVersion => "\K(.*)(?=";)' ./src/Globals.cs)
+                echo "::set-output name=version::$version"
 
             - name: Create Tag
               run: |

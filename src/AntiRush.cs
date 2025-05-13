@@ -1,8 +1,13 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using AntiRush.Classes;
 using AntiRush.Enums;
+using AntiRush.Extensions;
 using CSSharpUtils.Extensions;
+using CSSharpUtils.Utils;
+using FixVectorLeak.src;
+using FixVectorLeak.src.Structs;
 
 namespace AntiRush;
 
@@ -14,7 +19,8 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
             config.Reload();
 
         Config = config;
-        _countdown = Config.Countdown.Select(c => (float)c).ToArray();
+        Prefix = ChatUtils.FormatMessage(config.Prefix);
+        _countdown = [.. Config.Countdown.Select(c => (float)c)];
     }
 
     public override void Load(bool isReload)
@@ -29,24 +35,23 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
         AddCommand("css_antirush", "Anti-Rush", CommandAntiRush);
         AddCommand("css_addzone", "Add Zone", CommandAddZone);
-        //AddCommand("css_viewzones", "View Zones", CommandViewZones);
 
         LoadJson(Server.MapName);
 
         Server.NextFrame(() =>
         {
-            foreach (var controller in Utilities.GetPlayers())
-                _playerData[controller] = new PlayerData();
+            foreach (var player in Utilities.GetPlayers())
+                _playerData[player] = new PlayerData();
 
             if (Config.RestartOnLoad)
                 Server.ExecuteCommand("mp_restartgame 1");
         });
     }
 
-    private void SaveZone(CCSPlayerController controller)
+    private void SaveZone(CCSPlayerController player)
     {
-        var menu = _playerData[controller].AddZone;
-
+        var menu = _playerData[player].AddZoneMenu;
+         
         CsTeam[] teams = menu!.Items[1].Option switch
         {
             0 => [CsTeam.Terrorist],
@@ -56,8 +61,8 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         };
 
         var zoneType = (ZoneType)menu.Items[0].Option;
-        var minPoint = new Vector(Math.Min(menu.Points[0].X, menu.Points[1].X), Math.Min(menu.Points[0].Y, menu.Points[1].Y), Math.Min(menu.Points[0].Z, menu.Points[1].Z));
-        var maxPoint = new Vector(Math.Max(menu.Points[0].X, menu.Points[1].X), Math.Max(menu.Points[0].Y, menu.Points[1].Y), Math.Max(menu.Points[0].Z, menu.Points[1].Z));
+        float[] minPoint = [Math.Min(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Min(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Min(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z)];
+        float[] maxPoint = [Math.Max(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Max(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Max(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z)];
         var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? (float)Math.Floor(valueDelay * 10) / 10 : 0;
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
@@ -81,16 +86,16 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         if (zoneType == ZoneType.Hurt)
             printMessage += $" | {Localizer["menu.Damage"]} {ChatColors.Green}{damage}{ChatColors.White}";
 
-        controller.PrintToChat(printMessage);
+        player.PrintToChat(printMessage);
         SaveJson(Server.MapName);
 
         if (Config.DrawZones)
             zone.Draw();
     }
 
-    private bool PrintAction(CCSPlayerController controller, Zone zone)
+    private bool PrintAction(CCSPlayerController player, Zone zone)
     {
-        if (!controller.IsValid(true) || !(Server.CurrentTime - _playerData[controller].LastMessage >= 1))
+        if (!player.IsValid(true) || !(Server.CurrentTime - _playerData[player].LastMessage >= 1))
             return false;
 
         if (zone.Type == ZoneType.Hurt && Server.CurrentTime % 1 != 0)
@@ -99,13 +104,13 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         switch (Config.Messages)
         {
             case "simple":
-                controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
+                player.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
                 return true;
 
             case "detailed":
                 if (zone.Type is (ZoneType.Bounce or ZoneType.Teleport))
                 {
-                    controller.PrintToChat(Config.NoRushTime != 0
+                    player.PrintToChat(Config.NoRushTime != 0
                         ? $"{Prefix}{Localizer["rushDelayRemaining", zone.ToString(Localizer), (_roundStart + Config.NoRushTime - Server.CurrentTime).ToString("0")]}"
                         : $"{Prefix}{zone.ToString(Localizer)}");
 
@@ -114,51 +119,51 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
                 if (zone.Type == ZoneType.Hurt)
                 {
-                    controller.PrintToChat($"{Prefix}{Localizer["hurtDamage", zone.ToString(Localizer), zone.Damage]}");
+                    player.PrintToChat($"{Prefix}{Localizer["hurtDamage", zone.ToString(Localizer), zone.Damage]}");
                     return true;
                 }
-                
-                controller.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
+
+                player.PrintToChat($"{Prefix}{zone.ToString(Localizer)}");
                 return true;
         }
 
         return false;
     }
 
-    private void DoAction(CCSPlayerController controller, Zone zone)
+    private void DoAction(CCSPlayerController player, Zone zone)
     {
-        const PlayerButtons checkButtons = PlayerButtons.Forward | PlayerButtons.Back | PlayerButtons.Moveleft | PlayerButtons.Moveright;
+        if (player.PlayerPawn.Value?.MovementServices is null)
+            return;
 
-        if (PrintAction(controller, zone))
-            _playerData[controller].LastMessage = Server.CurrentTime;
+        if (PrintAction(player, zone))
+            _playerData[player].LastMessage = Server.CurrentTime;
 
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                if ((controller.Buttons & checkButtons) != 0)
-                    controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, new Vector(_playerData[controller].LastVel[0], _playerData[controller].LastVel[1], _playerData[controller].LastVel[2]));
-
-                else
-                    controller.Bounce(_playerData[controller].LastPos, _playerData[controller].LastVel);
+                _playerData[player].BlockButtons = (float)Server.TickedTime + 1;
+                player.Bounce(_playerData[player].LastPos, _playerData[player].LastVel);
 
                 return;
 
             case ZoneType.Hurt:
                 if (Server.CurrentTime % 1 == 0)
-                    controller.Damage(zone.Damage);
+                    player.Damage(zone.Damage);
 
                 return;
 
             case ZoneType.Kill:
-                controller.PlayerPawn.Value!.CommitSuicide(true, true);
+                player.PlayerPawn.Value.CommitSuicide(true, true);
                 return;
 
             case ZoneType.Teleport:
-                controller.PlayerPawn.Value!.Teleport(_playerData[controller].SpawnPos, controller.PlayerPawn.Value.EyeAngles, Vector.Zero);
+                if (_playerData[player].SpawnPos is not null)
+                    player.PlayerPawn.Value.Teleport(_playerData[player].SpawnPos, velocity: new Vector_t());
+
                 return;
 
             case ZoneType.Wall:
-                controller.PlayerPawn.Value?.Teleport(new Vector(_playerData[controller].LastPos[0], _playerData[controller].LastPos[1], _playerData[controller].LastPos[2]), null, Vector.Zero);
+                player.PlayerPawn.Value.Teleport(new Vector_t(_playerData[player].LastPos[0], _playerData[player].LastPos[1], _playerData[player].LastPos[2]), velocity: new Vector_t());
                 return;
         }
     }

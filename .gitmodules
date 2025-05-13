@@ -4,3 +4,6 @@
 [submodule "CSSharpUtils"]
 	path = CSSharpUtils
 	url = https://github.com/oscar-wos/CSSharpUtils
+[submodule "FixVectorLeak"]
+	path = FixVectorLeak
+	url = https://github.com/oscar-wos/FixVectorLeak

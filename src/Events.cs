@@ -2,6 +2,9 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using CSSharpUtils.Utils;
+using FixVectorLeak.src.Structs;
+using AntiRush.Extensions;
+using FixVectorLeak.src;
 
 namespace AntiRush;
 
@@ -41,65 +44,73 @@ public partial class AntiRush
 
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
     {
-        var controller = @event.Userid;
+        var player = @event.Userid;
 
-        if (controller == null || !controller.IsValid() || controller.PlayerPawn.Value == null || controller.PlayerPawn.Value.AbsOrigin == null)
+        if (player == null || !player.IsValid() || player.PlayerPawn.Value == null || player.PlayerPawn.Value.AbsOrigin == null)
             return HookResult.Continue;
 
-        if (_playerData.TryGetValue(controller, out var value))
-            value.SpawnPos = new Vector(controller.PlayerPawn.Value.AbsOrigin.X, controller.PlayerPawn.Value.AbsOrigin.Y, controller.PlayerPawn.Value.AbsOrigin.Z);
+        var origin = player.PlayerPawn.Value.AbsOrigin.ToVector_t();
+
+        if (_playerData.TryGetValue(player, out var playerData))
+            playerData.SpawnPos = origin;
 
         return HookResult.Continue;
     }
 
     private HookResult OnBulletImpact(EventBulletImpact @event, GameEventInfo info)
     {
-        var controller = @event.Userid;
+        var player = @event.Userid;
 
-        if (controller == null || !controller.IsValid() || !_playerData.TryGetValue(controller, out var value) || value.AddZone == null || !Menu.IsCurrentMenu(controller, value.AddZone))
+        if (player == null || !player.IsValid() || !_playerData.TryGetValue(player, out var playerData) || playerData.AddZoneMenu == null || !Menu.IsCurrentMenu(player, playerData.AddZoneMenu))
             return HookResult.Continue;
 
-        if (!value.AddZone.Points[0].IsZero() && !value.AddZone.Points[1].IsZero())
+        if (playerData.AddZoneMenu is null || playerData.AddZoneMenu.Points[0] is not null && playerData.AddZoneMenu.Points[1] is not null)
             return HookResult.Continue;
 
-        if (Server.CurrentTime - value.AddZone.LastShot < 0.1)
+        if (Server.CurrentTime - playerData.AddZoneMenu.LastShot < 0.1)
             return HookResult.Continue;
 
-        value.AddZone.LastShot = Server.CurrentTime;
+        playerData.AddZoneMenu.LastShot = Server.CurrentTime;
 
-        if (value.AddZone.Points[0].IsZero())
-            value.AddZone.Points[0] = new Vector(@event.X, @event.Y, @event.Z);
+        if (playerData.AddZoneMenu.Points[0] == null)
+            playerData.AddZoneMenu.Points[0] = new Vector_t(@event.X, @event.Y, @event.Z);
         else
         {
-            value.AddZone.Points[1] = new Vector(@event.X, @event.Y, @event.Z);
+            playerData.AddZoneMenu.Points[1] = new Vector_t(@event.X, @event.Y, @event.Z);
 
-            var diffX = Math.Abs(value.AddZone.Points[0].X - value.AddZone.Points[1].X);
-            var diffY = Math.Abs(value.AddZone.Points[0].Y - value.AddZone.Points[1].Y);
-            var diffZ = Math.Abs(value.AddZone.Points[0].Z - value.AddZone.Points[1].Z);
+            if (playerData.AddZoneMenu.Points[0] == null || playerData.AddZoneMenu.Points[1] == null)
+                return HookResult.Continue;
+
+            var diffX = Math.Abs(playerData.AddZoneMenu.Points[0]!.Value.X - playerData.AddZoneMenu.Points[1]!.Value.X);
+            var diffY = Math.Abs(playerData.AddZoneMenu.Points[0]!.Value.Y - playerData.AddZoneMenu.Points[1]!.Value.Y);
+            var diffZ = Math.Abs(playerData.AddZoneMenu.Points[0]!.Value.Z - playerData.AddZoneMenu.Points[1]!.Value.Z);
 
             if (diffX < 32)
             {
-                value.AddZone.Points[0].X += (value.AddZone.Points[0].X >= value.AddZone.Points[1].X ? 1 : -1) * ((32 - diffX) / 2);
-                value.AddZone.Points[1].X += (value.AddZone.Points[0].X > value.AddZone.Points[1].X ? -1 : 1) * ((32 - diffX) / 2);
+                playerData.AddZoneMenu.Points[0] = new Vector_t(playerData.AddZoneMenu.Points[0]!.Value.X + ((playerData.AddZoneMenu.Points[0]!.Value.X >= playerData.AddZoneMenu.Points[1]!.Value.X ? 1 : -1) * ((32 - diffX) / 2)), playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z);
+                playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X + ((playerData.AddZoneMenu.Points[0]!.Value.X > playerData.AddZoneMenu.Points[1]!.Value.X ? -1 : 1) * ((32 - diffX) / 2)), playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z);
             }
 
             if (diffY < 32)
             {
-                value.AddZone.Points[0].Y += (value.AddZone.Points[0].Y >= value.AddZone.Points[1].Y ? 1 : -1) * ((32 - diffY) / 2);
-                value.AddZone.Points[1].Y += (value.AddZone.Points[0].Y > value.AddZone.Points[1].Y ? -1 : 1) * ((32 - diffY) / 2);
+                playerData.AddZoneMenu.Points[0] = new Vector_t(playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y + ((playerData.AddZoneMenu.Points[0]!.Value.Y >= playerData.AddZoneMenu.Points[1]!.Value.Y ? 1 : -1) * ((32 - diffY) / 2)), playerData.AddZoneMenu.Points[0]!.Value.Z);
+                playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y + ((playerData.AddZoneMenu.Points[0]!.Value.Y > playerData.AddZoneMenu.Points[1]!.Value.Y ? -1 : 1) * ((32 - diffY) / 2)), playerData.AddZoneMenu.Points[1]!.Value.Z);
             }
 
             if (diffZ < 200)
             {
-                if (value.AddZone.Points[0].Z >= value.AddZone.Points[1].Z)
-                    value.AddZone.Points[0].Z += 200 - diffZ;
+                if (playerData.AddZoneMenu.Points[0]!.Value.Z >= playerData.AddZoneMenu.Points[1]!.Value.Z)
+                    playerData.AddZoneMenu.Points[0] = new Vector_t(playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z + ((playerData.AddZoneMenu.Points[0]!.Value.Z >= playerData.AddZoneMenu.Points[1]!.Value.Z ? 1 : -1) * ((200 - diffZ) / 2)));
                 else
-                    value.AddZone.Points[1].Z += 200 - diffZ;
+                    playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z + ((playerData.AddZoneMenu.Points[0]!.Value.Z > playerData.AddZoneMenu.Points[1]!.Value.Z ? -1 : 1) * ((200 - diffZ) / 2)));
             }
+
+            playerData.AddZone = new Zone([playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z], [playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z]);
+            playerData.AddZone.Draw();
         }
 
-        Menu.PopMenu(controller, value.AddZone);
-        BuildAddZoneMenu(controller);
+        Menu.PopMenu(player, playerData.AddZoneMenu);
+        BuildAddZoneMenu(player);
 
         return HookResult.Continue;
     }

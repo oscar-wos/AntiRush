@@ -3,25 +3,45 @@ using System.Drawing;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using AntiRush.Classes;
 using AntiRush.Enums;
+using FixVectorLeak.src;
+using FixVectorLeak.src.Structs;
 
 namespace AntiRush;
 
-public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] teams, Vector minPoint, Vector maxPoint)
+public class Zone
 {
-    public string Name { get; init; } = name;
-    public ZoneType Type { get; init; } = type;
-    public float Delay { get; init; } = delay;
-    public int Damage { get; init; } = damage;
-    public CsTeam[] Teams { get; init; } = teams;
-    public Vector MinPoint { get; init; } = minPoint;
-    public Vector MaxPoint { get; init; } = maxPoint;
-    public Dictionary<CCSPlayerController, ZoneData> Data { get; set; } = [];
-    public CBeam[] Beams { get; } = [];
-
-    public bool IsInZone(Vector point)
+    public Zone(string name, ZoneType type, float delay, int damage, CsTeam[] teams, float[] minPoint, float[] maxPoint)
     {
-        return point.X >= MinPoint.X && point.X <= MaxPoint.X && point.Y >= MinPoint.Y && point.Y <= MaxPoint.Y && point.Z + 36 >= MinPoint.Z && point.Z + 36 <= MaxPoint.Z;
+        Name = name;
+        Type = type;
+        Delay = delay;
+        Damage = damage;
+        Teams = teams;
+        MinPoint = minPoint;
+        MaxPoint = maxPoint;
+    }
+
+    public Zone(float[] minPoint, float[] maxPoint)
+    {
+        MinPoint = minPoint;
+        MaxPoint = maxPoint;
+    }
+
+    public string Name = "";
+    public ZoneType Type;
+    public float Delay;
+    public int Damage;
+    public CsTeam[] Teams = [];
+    public float[] MinPoint;
+    public float[] MaxPoint;
+    public Dictionary<CCSPlayerController, ZoneData> Data { get; set; } = [];
+    public CBeam[] Beams { get; set; } = [];
+
+    public bool IsInZone(float x, float y, float z)
+    {
+        return x >= MinPoint[0] && x <= MaxPoint[0] && y >= MinPoint[1] && y <= MaxPoint[1] && z >= MinPoint[2] && z <= MaxPoint[2];
     }
 
     public string ToString(IStringLocalizer localize)
@@ -37,20 +57,48 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
         };
     }
 
+    private Color GetBeamColor()
+    {
+        return Type switch
+        {
+            ZoneType.Bounce => Color.Yellow,
+            ZoneType.Hurt => Color.DarkOrange,
+            ZoneType.Kill => Color.Red,
+            ZoneType.Teleport => Color.Magenta,
+            ZoneType.Wall => Color.Blue,
+            _ => Color.White
+        };
+    }
+
+    public void Clear()
+    {
+        foreach (var beam in Beams)
+        {
+            if (beam == null || !beam.IsValid)
+                continue;
+
+            beam.AcceptInput("Kill");
+        }
+
+        Beams = [];
+    }
+
     public void Draw()
     {
-        if (MinPoint.IsZero() || MaxPoint.IsZero())
+        Clear();
+
+        if (MinPoint is null || MaxPoint is null)
             return;
 
-        var points = new Vector[8];
+        var points = new Vector_t[8];
 
         for (var i = 0; i < 8; i++)
         {
-            var x = (i & 1) == 0 ? MinPoint.X : MaxPoint.X;
-            var y = (i & 2) == 0 ? MinPoint.Y : MaxPoint.Y;
-            var z = (i & 4) == 0 ? MinPoint.Z : MaxPoint.Z;
-            
-            points[i] = new Vector(x, y, z);
+            var x = (i & 1) == 0 ? MinPoint[0] : MaxPoint[0];
+            var y = (i & 2) == 0 ? MinPoint[1] : MaxPoint[1];
+            var z = (i & 4) == 0 ? MinPoint[2] : MaxPoint[2];
+
+            points[i] = new Vector_t(x, y, z);
         }
 
         DrawBeam(points[0], points[1]);
@@ -65,36 +113,21 @@ public class Zone(string name, ZoneType type, float delay, int damage, CsTeam[] 
 
         for (var i = 0; i < 4; i++)
             DrawBeam(points[i], points[i + 4]);
-
-        return;
-
-        CBeam? DrawBeam(Vector start, Vector end)
-        {
-            var beam = Utilities.CreateEntityByName<CBeam>("beam");
-
-            if (beam == null)
-                return null;
-
-            beam.Teleport(start, QAngle.Zero, Vector.Zero);
-            beam.EndPos.Add(end);
-            beam.Render = GetBeamColor();
-            beam.Width = 1f;
-            beam.DispatchSpawn();
-
-            return beam;
-        }
     }
 
-    private Color GetBeamColor()
+    private CBeam? DrawBeam(Vector_t start, Vector_t end)
     {
-        return Type switch
-        {
-            ZoneType.Bounce => Color.Yellow,
-            ZoneType.Hurt => Color.DarkOrange,
-            ZoneType.Kill => Color.Red,
-            ZoneType.Teleport => Color.Magenta,
-            ZoneType.Wall => Color.Blue,
-            _ => Color.White
-        };
+        var beam = Utilities.CreateEntityByName<CBeam>("beam");
+
+        if (beam == null)
+            return null;
+
+        beam.Teleport(start);
+        beam.EndPos.Add(new Vector(end.X, end.Y, end.Z));
+        beam.Render = GetBeamColor();
+        beam.Width = 1f;
+        beam.DispatchSpawn();
+
+        return beam;
     }
 }
