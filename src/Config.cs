@@ -5,9 +5,10 @@ namespace AntiRush;
 
 public class AntiRushConfig : BasePluginConfig
 {
-    public override int Version { get; set; } = 8;
+    public override int Version { get; set; } = 9;
+    [JsonPropertyName("Prefix")] public string Prefix { get; set; } = "{White}[{Lime}AntiRush{White}] ";
     [JsonPropertyName("Messages")] public string Messages { get; set; } = "simple";
-    [JsonPropertyName("DrawZones")] public bool DrawZones { get; set; } = false;
+    [JsonPropertyName("DrawZones")] public bool DrawZones { get; set; } = true;
     [JsonPropertyName("Warmup")] public bool Warmup { get; set; } = false;
     [JsonPropertyName("DisableOnBombPlant")] public bool DisableOnBombPlant { get; set; } = true;
     [JsonPropertyName("RestartOnLoad")] public bool RestartOnLoad { get; set; } = true;

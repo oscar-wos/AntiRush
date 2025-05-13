@@ -22,3 +22,24 @@ jobs:
 
             - name: Build
               run: dotnet build -c Release
+
+            - name: Create Directories
+              run: |
+                mkdir -p plugin/plugins/${{ github.event.repository.name }}
+                mkdir -p plugin/gamedata
+
+            - name: Move Files
+              run: |
+                mv ./src/bin/Release/net8.0/* ./plugin/plugins/${{ github.event.repository.name }}
+                mv ./gamedata/* ./plugin/gamedata
+
+            - name: Zip
+              run: |
+                cd ./plugin
+                zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip .
+
+            - name: Publish
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ github.event.repository.name }}-${{ github.sha }}
+                path: ./plugin

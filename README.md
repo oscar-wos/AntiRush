@@ -3,7 +3,8 @@ https://www.youtube.com/watch?v=AkaBeFJcTv8
 `addons/counterstrikesharp/configs/plugins/AntiRush/AntiRush.json`
 ```json
 {
-  "Version": 8,
+  "Version": 9,
+  "Prefix": "{White}[{Lime}AntiRush{White}] ",
   "Messages": "simple",  // "simple", "detailed", "off"
   "DrawZones": false,    // Draw zones
   "Warmup": false,       // Do zones in warmup
@@ -16,6 +17,6 @@ https://www.youtube.com/watch?v=AkaBeFJcTv8
   "Countdown": [ 60, 30, 15, 10, 5, 3, 2, 1 ],
   "MinPlayers": 1,       // Minimum total players currently in a team for zones to work
   "MaxPlayers": 64,      // Maximum total players for zones to work, if currentPlayers >= MaxPlayers zones are disabled
-  "ConfigVersion": 8
+  "ConfigVersion": 9
 }
 ```

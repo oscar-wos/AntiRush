@@ -1,4 +1,4 @@
-﻿namespace AntiRush;
+﻿namespace AntiRush.Classes;
 
 public class ZoneData
 {

@@ -1,34 +1,36 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using AntiRush.Enums;
+using AntiRush.Extensions;
+using CSSharpUtils.Extensions;
 
 namespace AntiRush;
 
 public partial class AntiRush
 {
-    public void CommandAntiRush(CCSPlayerController? controller, CommandInfo info)
+    public void CommandAntiRush(CCSPlayerController? player, CommandInfo info)
     {
-        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/generic")) 
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/generic")) 
             return;
 
-        BuildMenu(controller);
+        BuildMenu(player);
     }
 
-    public void CommandAddZone(CCSPlayerController? controller, CommandInfo info)
+    public void CommandAddZone(CCSPlayerController? player, CommandInfo info)
     {
-        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/root"))
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/root"))
             return;
 
-        BuildMenu(controller);
-        BuildMenu(controller, MenuType.Add);
+        BuildMenu(player);
+        BuildMenu(player, MenuType.Add);
     }
 
-    public void CommandViewZones(CCSPlayerController? controller, CommandInfo info)
+    public void CommandViewZones(CCSPlayerController? player, CommandInfo info)
     {
-        if (controller == null || !controller.IsValid(true) || !controller.HasPermission("@css/generic"))
+        if (player == null || !player.IsValid(true) || !player.HasPermission("@css/generic"))
             return;
 
-        BuildMenu(controller);
-        BuildMenu(controller, MenuType.View);
+        BuildMenu(player);
+        BuildMenu(player, MenuType.View);
     }
 }
