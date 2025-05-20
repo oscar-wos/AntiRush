@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
+using System.Text.Json.Serialization;
 
 namespace AntiRush;
 

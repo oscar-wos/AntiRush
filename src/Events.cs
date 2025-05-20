@@ -1,10 +1,10 @@
-﻿using CounterStrikeSharp.API;
+﻿using AntiRush.Extensions;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using AntiRush.Extensions;
 using CSSharpUtils.Utils;
-using FixVectorLeak.src;
-using FixVectorLeak.src.Structs;
+using FixVectorLeak.Extensions;
+using FixVectorLeak.Structs;
 
 namespace AntiRush;
 
@@ -22,7 +22,7 @@ public partial class AntiRush
 
         foreach (var zone in _zones)
         {
-            zone.Data = [];
+            zone.Entry = [];
 
             if (Config.DrawZones)
                 zone.Draw();
@@ -49,10 +49,8 @@ public partial class AntiRush
         if (player == null || !player.IsValid() || player.PlayerPawn.Value?.AbsOrigin == null)
             return HookResult.Continue;
 
-        var origin = player.PlayerPawn.Value.AbsOrigin.ToVector_t();
-
         if (_playerData.TryGetValue(player, out var playerData))
-            playerData.SpawnPos = origin;
+            playerData.SpawnPos = player.PlayerPawn.Value.AbsOrigin.ToVector_t();
 
         return HookResult.Continue;
     }
@@ -105,9 +103,9 @@ public partial class AntiRush
                     playerData.AddZoneMenu.Points[1] = new Vector_t(playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z + 200 - diffZ);
             }
 
-            playerData.AddZone ??= new Zone([0, 0, 0], [0, 0, 0]);
-            playerData.AddZone.MinPoint = [playerData.AddZoneMenu.Points[0]!.Value.X, playerData.AddZoneMenu.Points[0]!.Value.Y, playerData.AddZoneMenu.Points[0]!.Value.Z];
-            playerData.AddZone.MaxPoint = [playerData.AddZoneMenu.Points[1]!.Value.X, playerData.AddZoneMenu.Points[1]!.Value.Y, playerData.AddZoneMenu.Points[1]!.Value.Z];
+            playerData.AddZone ??= new Zone(new Vector_t(), new Vector_t());
+            playerData.AddZone.MinPoint = playerData.AddZoneMenu.Points[0]!.Value;
+            playerData.AddZone.MaxPoint = playerData.AddZoneMenu.Points[1]!.Value;
             playerData.AddZone.Draw();
         }
 

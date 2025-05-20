@@ -1,18 +1,17 @@
-﻿using Microsoft.Extensions.Localization;
-using System.Drawing;
+﻿using AntiRush.Enums;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using AntiRush.Classes;
-using AntiRush.Enums;
-using FixVectorLeak.src;
-using FixVectorLeak.src.Structs;
+using FixVectorLeak.Extensions;
+using FixVectorLeak.Structs;
+using Microsoft.Extensions.Localization;
+using System.Drawing;
 
 namespace AntiRush;
 
 public class Zone
 {
-    public Zone(string name, ZoneType type, float delay, int damage, CsTeam[] teams, float[] minPoint, float[] maxPoint)
+    public Zone(string name, ZoneType type, float delay, int damage, CsTeam[] teams, Vector_t minPoint, Vector_t maxPoint)
     {
         Name = name;
         Type = type;
@@ -23,25 +22,25 @@ public class Zone
         MaxPoint = maxPoint;
     }
 
-    public Zone(float[] minPoint, float[] maxPoint)
+    public Zone(Vector_t minPoint, Vector_t maxPoint)
     {
         MinPoint = minPoint;
         MaxPoint = maxPoint;
     }
 
-    public string Name = "";
-    public ZoneType Type;
-    public float Delay;
-    public int Damage;
-    public CsTeam[] Teams = [];
-    public float[] MinPoint;
-    public float[] MaxPoint;
-    public Dictionary<CCSPlayerController, ZoneData> Data { get; set; } = [];
+    public string Name { get; set; } = string.Empty;
+    public ZoneType Type { get; set; }
+    public float Delay { get; set; }
+    public int Damage { get; set; }
+    public CsTeam[] Teams { get; set; } = [];
+    public Vector_t MinPoint { get; set; }
+    public Vector_t MaxPoint { get; set; }
     public List<CBeam> Beams { get; } = [];
+    public Dictionary<CCSPlayerController, float> Entry { get; set; } = [];
 
-    public bool IsInZone(float x, float y, float z)
+    public bool IsInZone(Vector_t pos)
     {
-        return x >= MinPoint[0] && x <= MaxPoint[0] && y >= MinPoint[1] && y <= MaxPoint[1] && z >= MinPoint[2] && z <= MaxPoint[2];
+        return pos.X >= MinPoint.X && pos.X <= MaxPoint.X && pos.Y >= MinPoint.Y && pos.Y <= MaxPoint.Y && pos.Z + 36 >= MinPoint.Z && pos.Z + 36 <= MaxPoint.Z;
     }
 
     public string ToString(IStringLocalizer localize)
@@ -72,13 +71,8 @@ public class Zone
 
     public void Clear()
     {
-        foreach (var beam in Beams)
-        {
-            if (beam == null || !beam.IsValid)
-                continue;
-
+        foreach (var beam in Beams.Where(b => b.IsValid))
             beam.AcceptInput("Kill");
-        }
 
         Beams.Clear();
     }
@@ -86,9 +80,6 @@ public class Zone
     public void Draw()
     {
         Clear();
-
-        if (MinPoint is null || MaxPoint is null)
-            return;
 
         var points = new Vector_t[8];
 
@@ -115,22 +106,23 @@ public class Zone
             DrawBeam(points[i], points[i + 4]);
     }
 
-    private CBeam? DrawBeam(Vector_t start, Vector_t end)
+    private void DrawBeam(Vector_t start, Vector_t end)
     {
         var beam = Utilities.CreateEntityByName<CBeam>("beam");
 
         if (beam == null)
-            return null;
+            return;
+
+        beam.Render = GetBeamColor();
+        beam.Width = 1f;
 
         beam.Teleport(start);
         beam.EndPos.X = end.X;
         beam.EndPos.Y = end.Y;
         beam.EndPos.Z = end.Z;
-        beam.Render = GetBeamColor();
-        beam.Width = 1f;
         beam.DispatchSpawn();
-        Beams.Add(beam);
 
-        return beam;
+        Beams.Add(beam);
+        return;
     }
 }

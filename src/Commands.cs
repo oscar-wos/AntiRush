@@ -1,7 +1,7 @@
-﻿using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Commands;
-using AntiRush.Enums;
+﻿using AntiRush.Enums;
 using AntiRush.Extensions;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Commands;
 using CSSharpUtils.Extensions;
 
 namespace AntiRush;

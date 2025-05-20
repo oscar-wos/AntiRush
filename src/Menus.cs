@@ -1,11 +1,10 @@
-﻿using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Admin;
+﻿using AntiRush.Enums;
+using AntiRush.Extensions;
+using CounterStrikeSharp.API.Core;
+using CSSharpUtils.Extensions;
+using FixVectorLeak.Structs;
 using Menu;
 using Menu.Enums;
-using AntiRush.Enums;
-using AntiRush.Extensions;
-using CSSharpUtils.Extensions;
-using FixVectorLeak.src.Structs;
 
 namespace AntiRush;
 
@@ -55,7 +54,7 @@ public partial class AntiRush
             new CustomButton(Localizer["menu.View"], c => BuildMenu(c, MenuType.View))
         };
 
-        customButtons[0].Prefix = !AdminManager.PlayerHasPermissions(player, "@css/root") ? "<font color=\"#808080\">" : "";
+        customButtons[0].Prefix = !player.HasPermission("@css/root") ? "<font color=\"#808080\">" : "";
 
         mainMenu.AddItem(new MenuItem(MenuItemType.Button, customButtons));
         mainMenu.AddItem(new MenuItem(MenuItemType.Spacer));

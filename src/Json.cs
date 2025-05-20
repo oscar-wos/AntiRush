@@ -1,8 +1,9 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using AntiRush.Enums;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Modules.Utils;
-using AntiRush.Enums;
+using FixVectorLeak.Structs;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AntiRush;
 
@@ -34,8 +35,8 @@ public partial class AntiRush
                 zone.Delay,
                 zone.Damage,
                 [.. zone.Teams.Select(t => (CsTeam)Enum.ToObject(typeof(CsTeam), t))],
-                [Math.Min(zone.X[0], zone.Y[0]), Math.Min(zone.X[1], zone.Y[1]), Math.Min(zone.X[2], zone.Y[2])],
-                [Math.Max(zone.X[0], zone.Y[0]), Math.Max(zone.X[1], zone.Y[1]), Math.Max(zone.X[2], zone.Y[2])]
+                new Vector_t(Math.Min(zone.X[0], zone.Y[0]), Math.Min(zone.X[1], zone.Y[1]), Math.Min(zone.X[2], zone.Y[2])),
+                new Vector_t(Math.Max(zone.X[0], zone.Y[0]), Math.Max(zone.X[1], zone.Y[1]), Math.Max(zone.X[2], zone.Y[2]))
             ));
     }
 
@@ -46,7 +47,7 @@ public partial class AntiRush
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);
 
-        path += $"/{mapName}.json";
+        path = Path.Join(path, $"{mapName}.json");
 
         if (_zones.Count == 0)
             return;
@@ -61,8 +62,8 @@ public partial class AntiRush
                 Delay = zone.Delay,
                 Damage = zone.Damage,
                 Teams = [.. zone.Teams.Select(team => (int)team)],
-                X = [zone.MinPoint[0], zone.MinPoint[1], zone.MinPoint[2]],
-                Y = [zone.MaxPoint[0], zone.MaxPoint[1], zone.MaxPoint[2]]
+                X = [zone.MinPoint.X, zone.MinPoint.Y, zone.MinPoint.Z],
+                Y = [zone.MaxPoint.X, zone.MaxPoint.Y, zone.MaxPoint.Z]
             }
         );
 

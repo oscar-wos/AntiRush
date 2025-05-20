@@ -1,10 +1,8 @@
-﻿using CounterStrikeSharp.API;
-using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Modules.Memory.DynamicFunctions;
-using AntiRush.Classes;
+﻿using AntiRush.Classes;
 using AntiRush.Extensions;
-using FixVectorLeak.src;
-using FixVectorLeak.src.Structs;
+using CounterStrikeSharp.API;
+using FixVectorLeak.Extensions;
+using FixVectorLeak.Structs;
 
 namespace AntiRush;
 
@@ -41,17 +39,14 @@ public partial class AntiRush
                 if (Config.NoCampTime != 0 && Config.NoCampTime + _roundStart > Server.CurrentTime && Config.CampZones.Contains((int)zone.Type))
                     continue;
 
-                var isInZone = zone.IsInZone(origin.X, origin.Y, origin.Z);
-
-                if (!zone.Data.TryGetValue(player, out var zoneData))
-                    zoneData = new ZoneData();
+                var isInZone = zone.IsInZone(origin);
 
                 if (!zone.Teams.Contains(player.Team))
                     continue;
 
                 if (!isInZone)
                 {
-                    zoneData.Entry = 0;
+                    zone.Entry[player] = 0;
                     continue;
                 }
 
@@ -62,14 +57,16 @@ public partial class AntiRush
                     continue;
                 }
 
-                if (zoneData.Entry == 0)
-                    zoneData.Entry = Server.CurrentTime;
-                
-                var diff = (zoneData.Entry + zone.Delay) - Server.CurrentTime;
+                if (zone.Entry[player] == 0)
+                    zone.Entry[player] = Server.CurrentTime;
+
+                var diff = (zone.Entry[player] + zone.Delay) - Server.CurrentTime;
 
                 if (diff > 0)
                 {
-                    if (Math.Abs(diff) < 0.01 && diff >= 1)
+                    var diffString = diff % 1;
+
+                    if (diffString.ToString("0.00") is ("0.00" or "0.01") && diff >= 1)
                         player.PrintToChat($"{Prefix}{Localizer["delayRemaining", zone.ToString(Localizer), diff.ToString("0")]}");
 
                     continue;
@@ -82,8 +79,8 @@ public partial class AntiRush
             if (doAction)
                 continue;
 
-            playerData.LastPos = [origin.X, origin.Y, origin.Z];
-            playerData.LastVel = [velocity.X, velocity.Y, velocity.Z];
+            playerData.LastPos = origin;
+            playerData.LastVel = velocity;
         }
 
         if (Config.NoRushTime != 0 && !_bombPlanted)
@@ -122,40 +119,5 @@ public partial class AntiRush
             return;
 
         _playerData[player] = new PlayerData();
-    }
-
-    private HookResult OnProcessMovement(DynamicHook h)
-    {
-        try
-        {
-            CCSPlayer_MovementServices ms = h.GetParam<CCSPlayer_MovementServices>(0);
-            var player = ms.Pawn.Value.Controller.Value?.As<CCSPlayerController>();
-
-            if (player == null || !player.IsValid() || !_playerData.TryGetValue(player, out var playerData))
-                return HookResult.Continue;
-
-            CUserCmd userCmd = new(h.GetParam<IntPtr>(_isLinux ? 1 : 2));
-            var baseCmd = userCmd.GetBaseCmd();
-
-            if (playerData.BlockButtons != 0)
-            {
-                if (Server.TickedTime >= playerData.BlockButtons)
-                    playerData.BlockButtons = 0;
-                else
-                {
-                    baseCmd.DisableForwardMove();
-                    baseCmd.DisableSideMove();
-                    baseCmd.DisableUpMove();
-
-                    userCmd.DisableInput(h.GetParam<IntPtr>(_isLinux ? 1 : 2), 6); //disable jump (2) + duck (4) = 6
-                }
-            }
-
-            return HookResult.Changed;
-        }
-        catch (Exception)
-        {
-            return HookResult.Continue;
-        }
     }
 }

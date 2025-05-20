@@ -1,7 +1,7 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using FixVectorLeak.src;
-using FixVectorLeak.src.Structs;
+using FixVectorLeak.Extensions;
+using FixVectorLeak.Structs;
 
 namespace AntiRush.Extensions;
 
@@ -27,16 +27,14 @@ public static class PlayerExtentions
             player.PlayerPawn.Value.CommitSuicide(true, true);
     }
 
-    public static void Bounce(this CCSPlayerController? player, float[] lastPos, float[] lastVel)
+    public static void Bounce(this CCSPlayerController? player, Vector_t lastPos, Vector_t lastVel)
     {
         if (player == null || player.PlayerPawn.Value == null)
             return;
 
-        var speed = -300 / (float)Math.Sqrt(lastVel[0] * lastVel[0] + lastVel[1] * lastVel[1]);
+        var speed = -300 / (float)Math.Sqrt(lastVel.X * lastVel.X + lastVel.Y * lastVel.Y);
+        Vector_t newVel = new(lastVel.X * speed, lastVel.Y * speed, -100);
 
-        Vector_t newPos = new(lastPos[0], lastPos[1], lastPos[2]);
-        Vector_t newVel = new(lastVel[0] * speed, lastVel[1] * speed, lastVel[2] * speed <= 0 ? 100 : Math.Min(lastVel[2] * speed, 100));
-
-        player.PlayerPawn.Value.Teleport(newPos, velocity: newVel);
+        player.PlayerPawn.Value.Teleport(lastPos, velocity: newVel);
     }
 }

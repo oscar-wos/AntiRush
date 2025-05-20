@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
+﻿using AntiRush.Classes;
+using AntiRush.Enums;
+using AntiRush.Extensions;
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
-using AntiRush.Classes;
-using AntiRush.Enums;
-using AntiRush.Extensions;
 using CSSharpUtils.Extensions;
 using CSSharpUtils.Utils;
-using FixVectorLeak.src;
-using FixVectorLeak.src.Structs;
+using FixVectorLeak.Extensions;
+using FixVectorLeak.Structs;
+using Microsoft.Extensions.Logging;
 
 namespace AntiRush;
 
@@ -49,24 +48,22 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 Server.ExecuteCommand("mp_restartgame 1");
         });
 
-        _isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-
         Logger.LogInformation("{ModuleName} loaded successfully!", ModuleName);
-        _ProcessMovement = new(GameData.GetSignature("RunCommand"));
-        _ProcessMovement!.Hook(OnProcessMovement, HookMode.Pre);
     }
 
     public override void Unload(bool isReload)
     {
         Logger.LogInformation("{ModuleName} unloaded successfully!", ModuleName);
-        _ProcessMovement!.Unhook(OnProcessMovement, HookMode.Pre);
     }
 
     private void SaveZone(CCSPlayerController player)
     {
-        var menu = _playerData[player].AddZoneMenu;
-        _playerData[player].AddZone?.Clear();
-         
+        if (!_playerData.TryGetValue(player, out var playerData))
+            return;
+
+        var menu = playerData.AddZoneMenu;
+        playerData.AddZone?.Clear();
+
         CsTeam[] teams = menu!.Items[1].Option switch
         {
             0 => [CsTeam.Terrorist, CsTeam.CounterTerrorist],
@@ -76,8 +73,8 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         };
 
         var zoneType = (ZoneType)menu.Items[0].Option;
-        float[] minPoint = [Math.Min(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Min(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Min(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z)];
-        float[] maxPoint = [Math.Max(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Max(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Max(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z)];
+        var minPoint = new Vector_t(Math.Min(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Min(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Min(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z));
+        var maxPoint = new Vector_t(Math.Max(menu.Points[0]!.Value.X, menu.Points[1]!.Value.X), Math.Max(menu.Points[0]!.Value.Y, menu.Points[1]!.Value.Y), Math.Max(menu.Points[0]!.Value.Z, menu.Points[1]!.Value.Z));
         var delay = zoneType != ZoneType.Bounce && float.TryParse(menu.Items[3].DataString, out var valueDelay) ? (float)Math.Floor(valueDelay * 10) / 10 : 0;
         var damage = zoneType == ZoneType.Hurt && int.TryParse(menu.Items[4].DataString, out var valueDamage) ? valueDamage : 0;
         var name = menu.Items[2].DataString;
@@ -106,9 +103,6 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
 
         if (Config.DrawZones)
             zone.Draw();
-
-        if (_playerData.TryGetValue(player, out var playerData))
-            playerData.AddZone?.Clear();
     }
 
     private bool PrintAction(CCSPlayerController player, Zone zone)
@@ -153,16 +147,17 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
         if (player.PlayerPawn.Value?.MovementServices is null)
             return;
 
-        if (PrintAction(player, zone))
-            _playerData[player].LastMessage = Server.CurrentTime;
+        if (!_playerData.TryGetValue(player, out var playerData))
+            return;
 
-        if (zone.Type is (ZoneType.Bounce or ZoneType.Wall))
-            _playerData[player].BlockButtons = Server.TickedTime + 0.3;
+        if (PrintAction(player, zone))
+            playerData.LastMessage = Server.CurrentTime;
 
         switch (zone.Type)
         {
             case ZoneType.Bounce:
-                player.Bounce(_playerData[player].LastPos, _playerData[player].LastVel);
+                if (playerData.LastPos is not null && playerData.LastVel is not null)
+                    player.Bounce((Vector_t)playerData.LastPos, (Vector_t)playerData.LastVel);
 
                 return;
 
@@ -177,13 +172,15 @@ public partial class AntiRush : BasePlugin, IPluginConfig<AntiRushConfig>
                 return;
 
             case ZoneType.Teleport:
-                if (_playerData[player].SpawnPos is not null)
-                    player.PlayerPawn.Value.Teleport(_playerData[player].SpawnPos, velocity: new Vector_t());
+                if (playerData.SpawnPos is not null)
+                    player.PlayerPawn.Value.Teleport(playerData.SpawnPos, velocity: new Vector_t());
 
                 return;
 
             case ZoneType.Wall:
-                player.PlayerPawn.Value.Teleport(new Vector_t(_playerData[player].LastPos[0], _playerData[player].LastPos[1], _playerData[player].LastPos[2]), velocity: new Vector_t());
+                if (playerData.LastPos is not null)
+                    player.PlayerPawn.Value.Teleport(playerData.LastPos, velocity: new Vector_t());
+
                 return;
         }
     }
