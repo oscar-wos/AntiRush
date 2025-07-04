@@ -46,7 +46,7 @@ public partial class AntiRush
                     continue;
 
                 if (!zone.Entry.ContainsKey(player))
-                    zone.Entry[player] = 0;
+                    zone.Entry[player] = Server.CurrentTime;
 
                 if (!isInZone)
                 {
