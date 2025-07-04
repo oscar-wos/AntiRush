@@ -1,6 +1,7 @@
 ﻿using AntiRush.Classes;
 using AntiRush.Extensions;
 using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using FixVectorLeak.Extensions;
 using FixVectorLeak.Structs;
 
@@ -16,7 +17,7 @@ public partial class AntiRush
         if (!_minPlayers || !_maxPlayers)
             return;
 
-        foreach (var player in Utilities.GetPlayers().Where(p => p.IsValid() && p.PawnIsAlive))
+        foreach (var player in Utilities.GetPlayers().Where(p => p.IsValid() && (LifeState_t)p.PlayerPawn.Value!.LifeState == LifeState_t.LIFE_ALIVE))
         {
             if (player.PlayerPawn.Value?.AbsOrigin == null)
                 continue;
@@ -43,6 +44,9 @@ public partial class AntiRush
 
                 if (!zone.Teams.Contains(player.Team))
                     continue;
+
+                if (!zone.Entry.ContainsKey(player))
+                    zone.Entry[player] = 0;
 
                 if (!isInZone)
                 {
